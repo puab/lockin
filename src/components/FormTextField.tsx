@@ -7,6 +7,8 @@ type FormTextFieldProps = {
     errors?: string[];
     value?: string;
     onChange?: (text: string) => void;
+    numberOfLines?: number;
+    multiline?: boolean;
 };
 
 export default function FormTextField({
@@ -15,6 +17,8 @@ export default function FormTextField({
     errors,
     value,
     onChange,
+    numberOfLines,
+    multiline,
 }: FormTextFieldProps) {
     return (
         <View>
@@ -25,6 +29,9 @@ export default function FormTextField({
                 onChangeText={onChange}
                 error={errors?.length != undefined && errors.length > 0}
                 mode='outlined'
+                numberOfLines={numberOfLines}
+                multiline={multiline}
+                style={{ maxHeight: 150 }}
             />
 
             {errors?.map((err, idx) => (

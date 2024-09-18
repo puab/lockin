@@ -1,6 +1,6 @@
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
-import { AuthContextProvider } from './contexts/AuthContext';
+import { AuthContextProvider } from './contexts/AppContext';
 import { DateTime } from 'luxon';
 import { Icon, PaperProvider } from 'react-native-paper';
 import AppTheme from './Theme';
@@ -13,27 +13,35 @@ import TasksScreen from './pages/Tasks';
 import HabitScreen from './pages/Habits';
 
 import '../gesture-handler';
+import { enGB, registerTranslation } from 'react-native-paper-dates';
+registerTranslation('en-GB', enGB);
+
 import UserMenu from './components/UserMenu';
 import NewTaskScreen from './pages/Tasks/NewTask';
+import { View } from 'react-native';
+import HeaderBackButton from './components/HeaderBackButton';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const Drawer = createDrawerNavigator();
 
 export default function App() {
     return (
-        <NavigationContainer>
-            <AuthContextProvider>
-                <PaperProvider theme={AppTheme}>
-                    <Root />
-                </PaperProvider>
-            </AuthContextProvider>
-        </NavigationContainer>
+        <GestureHandlerRootView>
+            <NavigationContainer>
+                <AuthContextProvider>
+                    <PaperProvider theme={AppTheme}>
+                        <Root />
+                    </PaperProvider>
+                </AuthContextProvider>
+            </NavigationContainer>
+        </GestureHandlerRootView>
     );
 }
 
 function Root() {
     return (
         <Drawer.Navigator
-            initialRouteName='Auth'
+            initialRouteName='Home'
             screenOptions={{
                 drawerStyle: {
                     backgroundColor: AppTheme.colors.surface,
@@ -60,7 +68,7 @@ function Root() {
                             size={size}
                         />
                     ),
-                    headerRight: () => <UserMenu />,
+                    // headerRight: () => <UserMenu />,
                 }}
             />
 
@@ -82,6 +90,7 @@ function Root() {
                 name='New task'
                 component={NewTaskScreen}
                 options={{
+                    headerLeft: () => <HeaderBackButton />,
                     drawerItemStyle: { display: 'none' },
                 }}
             />

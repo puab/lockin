@@ -2,11 +2,11 @@ import SectionDivider from '../../components/SectionDivider';
 import { StyleSheet, View } from 'react-native';
 
 import PageLayout from '../../components/PageLayout';
-import { useAuthContext } from '../../contexts/AuthContext';
 import { Text } from 'react-native-paper';
+import { useAppContext } from '../../contexts/AppContext';
 
 export default function HomeScreen({ navigation }) {
-    const { user, setUser } = useAuthContext();
+    const user = useAppContext(s => s.user);
 
     return (
         <PageLayout style={S.container}>

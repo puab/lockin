@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { useAuthContext } from '../contexts/AuthContext';
+import { useAppContext } from '../contexts/AppContext';
 import { Menu } from 'react-native-paper';
 import { TouchableOpacity } from 'react-native';
 import { User } from 'lucide-react-native';
 import API from '../API';
 
 export default function UserMenu() {
-    const { setUser, nav } = useAuthContext();
+    const setUser = useAppContext(s => s.setUser);
+    const nav = useAppContext(s => s.nav);
+
     const [userMenuOpen, setUserMenuOpen] = useState(false);
 
     async function handleLogout() {

@@ -1,4 +1,4 @@
-import axios, { Axios, AxiosError } from 'axios';
+import axios, { AxiosError } from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
@@ -58,7 +58,7 @@ class _API {
     }
 
     async loadUser() {
-        const token = await this.getToken();
+        await this.getToken();
 
         const { data: user } = await ax.get('/api/user');
 

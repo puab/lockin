@@ -5,13 +5,15 @@ import { useEffect, useState } from 'react';
 import FormTextField from '../../components/FormTextField';
 
 import API from '../../API';
-import { useAuthContext } from '../../contexts/AuthContext';
+import { useAuthContext } from '../../contexts/AppContext';
 
 import { Button, Text } from 'react-native-paper';
 import AppTheme from '../../Theme';
+import LoaderPlaceholder from '../../components/LoaderPlaceholder';
 
 export default function AuthScreen({ navigation }) {
-    const { checkingUser, reloadUser } = useAuthContext();
+    const checkingUser = useAuthContext(s => s.checkingUser);
+    const reloadUser = useAuthContext(s => s.reloadUser);
 
     const [busy, setBusy] = useState<boolean>(false);
     const [errors, setErrors] = useState<{ [key: string]: string[] }>({});
@@ -66,11 +68,7 @@ export default function AuthScreen({ navigation }) {
     return (
         <PageLayout style={S.container}>
             {checkingUser ? (
-                <Fold
-                    size={50}
-                    color={AppTheme.colors.primary}
-                    style={S.loader}
-                />
+                <LoaderPlaceholder />
             ) : (
                 <>
                     <View style={S.form}>
@@ -151,8 +149,5 @@ const S = StyleSheet.create({
     },
     switcherText: {
         textDecorationLine: 'underline',
-    },
-    loader: {
-        margin: 'auto',
     },
 });
