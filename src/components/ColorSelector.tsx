@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { Keyboard, StyleSheet, View } from 'react-native';
 import { COLORS } from '../Theme';
 import { Text } from 'react-native-paper';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -16,16 +16,15 @@ export default function ColorSelector({ value, onChange }: ColorSelectorProps) {
 
                 return (
                     <TouchableOpacity
-                        onPress={() => onChange(val)}
+                        onPress={() => {
+                            Keyboard.dismiss();
+                            onChange(val);
+                        }}
                         key={`cc${idx}`}
                     >
-                        <View
-                            style={[
-                                S.cell,
-                                { backgroundColor: hex },
-                                selected && S.cellSelected,
-                            ]}
-                        ></View>
+                        <View style={[S.cell, { backgroundColor: hex }]}>
+                            {selected && <View style={S.selectedTick}></View>}
+                        </View>
                     </TouchableOpacity>
                 );
             })}
@@ -43,8 +42,13 @@ const S = StyleSheet.create({
     cell: {
         aspectRatio: '1 / 1',
         width: 25,
+        borderRadius: 5,
     },
-    cellSelected: {
-        elevation: 10,
+    selectedTick: {
+        margin: 'auto',
+        height: '35%',
+        aspectRatio: '1 / 1',
+        backgroundColor: 'black',
+        borderRadius: 3,
     },
 });

@@ -7,8 +7,14 @@ import { useNavigation } from '@react-navigation/core';
 import { createContext, useContextSelector } from 'use-context-selector';
 import LS from '../LocalStorage';
 import { Task } from '../pages/Tasks/Types';
+import { Habit } from '../pages/Habits/Types';
+import { delay } from '../Util';
+import LoaderPlaceholder from '../components/LoaderPlaceholder';
+import PageLayout from '../components/PageLayout';
 
 export type AppContextType = {
+    initialLoad: boolean;
+
     user: any;
     setUser: (u: any) => void;
     checkingUser: boolean;
@@ -17,10 +23,15 @@ export type AppContextType = {
     tasks: Task[];
     reloadTasksFromStorage: () => Promise<void>;
 
+    habits: Habit[];
+    reloadHabitsFromStorage: () => Promise<void>;
+
     nav: NativeStackNavigationProp<any> | null;
 };
 
 const AppContext = createContext<AppContextType>({
+    initialLoad: true,
+
     user: null,
     setUser: () => {},
     checkingUser: false,
@@ -29,16 +40,21 @@ const AppContext = createContext<AppContextType>({
     tasks: [],
     reloadTasksFromStorage: async () => {},
 
+    habits: [],
+    reloadHabitsFromStorage: async () => {},
+
     nav: null,
 });
 
-export function AuthContextProvider({ children }) {
+export function AppContextProvider({ children }) {
+    const [initialLoad, setInitialLoad] = useState<boolean>(true);
     const nav = useNavigation<NativeStackNavigationProp<any>>();
 
     const [user, setUser] = useState<any>(null);
     const [checkingUser, setCheckingUser] = useState<boolean>(false);
 
     const [tasks, setTasks] = useState<Task[]>([]);
+    const [habits, setHabits] = useState<Habit[]>([]);
 
     async function tryLoadUser() {
         try {
@@ -55,28 +71,52 @@ export function AuthContextProvider({ children }) {
     }
 
     async function reloadTasksFromStorage() {
-        const lsTasks = await LS.getTasks();
+        await LS.tasks.clearOldTasks();
+        const lsTasks = await LS.tasks.getTasks();
         setTasks(lsTasks);
     }
 
+    async function reloadHabitsFromStorage() {
+        await delay(2000);
+        const lsHabits = await LS.habits.getHabits();
+        setHabits(lsHabits);
+    }
+
     useEffect(() => {
-        tryLoadUser();
-        reloadTasksFromStorage();
+        (async () => {
+            await Promise.all([
+                reloadTasksFromStorage(),
+                reloadHabitsFromStorage(),
+            ]);
+            setInitialLoad(false);
+        })();
     }, []);
 
     return (
         <AppContext.Provider
             value={{
+                initialLoad,
+
                 user,
                 setUser,
                 checkingUser,
                 tryLoadUser,
                 nav,
+
                 tasks,
                 reloadTasksFromStorage,
+
+                habits,
+                reloadHabitsFromStorage,
             }}
         >
-            {children}
+            {initialLoad ? (
+                <PageLayout>
+                    <LoaderPlaceholder />
+                </PageLayout>
+            ) : (
+                children
+            )}
         </AppContext.Provider>
     );
 }

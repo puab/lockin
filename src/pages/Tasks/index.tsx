@@ -3,7 +3,7 @@ import PageLayout from '../../components/PageLayout';
 import { DateNow } from '../../Util';
 import DateRow from './components/DateRow';
 import { DateTime } from 'luxon';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
     Button,
     Dialog,
@@ -18,11 +18,15 @@ import { Task } from './Types';
 import EditDialog from './components/EditDialog';
 import LS from '../../LocalStorage';
 import { useAppContext } from '../../contexts/AppContext';
+import AddItemButton from '../../components/AddItemButton';
 
-export default function TasksScreen({ navigation }) {
+export default function TasksScreen({ route, navigation }) {
     const reloadTasksFromStorage = useAppContext(s => s.reloadTasksFromStorage);
+    const currentDateMs = route?.params?.currentDateMs;
 
-    const [curDate, setCurDate] = useState<DateTime>(DateNow);
+    const [curDate, setCurDate] = useState<DateTime>(
+        currentDateMs ? DateTime.fromMillis(currentDateMs) : DateNow
+    );
     useEffect(() => {
         navigation?.setOptions({
             headerRight: () => (
@@ -32,6 +36,10 @@ export default function TasksScreen({ navigation }) {
             ),
         });
     }, [curDate]);
+
+    useMemo(() => {
+        if (currentDateMs) setCurDate(DateTime.fromMillis(currentDateMs));
+    }, [currentDateMs]);
 
     const [isEditing, setEditing] = useState<boolean>(false);
     const editTargetRef = useRef<Task | null>(null);
@@ -44,22 +52,23 @@ export default function TasksScreen({ navigation }) {
     const deleteTargetRef = useRef<Task | null>(null);
     async function wantsDelete(task: Task) {
         deleteTargetRef.current = task;
-        await LS.deleteTask(task);
+        await LS.tasks.deleteTask(task);
         await reloadTasksFromStorage();
         setJustDeleted(true);
     }
 
     return (
         <PageLayout style={S.page}>
-            <FAB
-                icon={'plus'}
-                style={S.fab}
-                onPress={() =>
-                    navigation?.navigate('New task', {
-                        currentDateMs: curDate.toMillis(),
-                    })
-                }
-            />
+            {curDate.startOf('day').toMillis() >=
+                DateNow.startOf('day').toMillis() && (
+                <AddItemButton
+                    onPress={() =>
+                        navigation?.navigate('New task', {
+                            currentDateMs: curDate.toMillis(),
+                        })
+                    }
+                />
+            )}
 
             <DateRow
                 selected={curDate}
@@ -74,42 +83,48 @@ export default function TasksScreen({ navigation }) {
                 wantsDelete={wantsDelete}
             />
 
-            <EditDialog
-                open={isEditing}
-                setOpen={setEditing}
-                task={editTargetRef.current as Task}
-            />
+            {useMemo(
+                () => (
+                    <EditDialog
+                        open={isEditing}
+                        setOpen={setEditing}
+                        task={editTargetRef.current as Task}
+                    />
+                ),
+                [isEditing]
+            )}
 
-            <Portal>
-                <Snackbar
-                    visible={justDeleted}
-                    onDismiss={() => {
-                        deleteTargetRef.current = null;
-                        setJustDeleted(false);
-                    }}
-                    action={{
-                        label: 'Undo',
-                        onPress: async () => {
-                            if (deleteTargetRef.current) {
-                                await LS.createTask(deleteTargetRef.current),
-                                    await reloadTasksFromStorage();
-                            }
-                        },
-                    }}
-                >
-                    Deleted task
-                </Snackbar>
-            </Portal>
+            {useMemo(
+                () => (
+                    <Portal>
+                        <Snackbar
+                            visible={justDeleted}
+                            onDismiss={() => {
+                                deleteTargetRef.current = null;
+                                setJustDeleted(false);
+                            }}
+                            action={{
+                                label: 'Undo',
+                                onPress: async () => {
+                                    if (deleteTargetRef.current) {
+                                        await LS.tasks.createTask(
+                                            deleteTargetRef.current
+                                        ),
+                                            await reloadTasksFromStorage();
+                                    }
+                                },
+                            }}
+                        >
+                            Deleted task
+                        </Snackbar>
+                    </Portal>
+                ),
+                [justDeleted]
+            )}
         </PageLayout>
     );
 }
 
 const S = StyleSheet.create({
     page: { padding: 5, paddingBottom: 0 },
-    fab: {
-        position: 'absolute',
-        bottom: 20,
-        right: 20,
-        zIndex: 1,
-    },
 });

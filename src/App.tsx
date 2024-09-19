@@ -1,26 +1,25 @@
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
-import { AuthContextProvider } from './contexts/AppContext';
+import { AppContextProvider } from './contexts/AppContext';
 import { DateTime } from 'luxon';
 import { Icon, PaperProvider } from 'react-native-paper';
 import AppTheme from './Theme';
 
 import HomeScreen from './pages/Home';
-import GratitudeScreen from './pages/Gratitude';
+import JournalScreen from './pages/Journal';
 import AuthScreen from './pages/Auth';
 import SettingsScreen from './pages/Settings';
 import TasksScreen from './pages/Tasks';
+import NewTaskScreen from './pages/Tasks/NewTask';
 import HabitScreen from './pages/Habits';
 
 import '../gesture-handler';
 import { enGB, registerTranslation } from 'react-native-paper-dates';
 registerTranslation('en-GB', enGB);
 
-import UserMenu from './components/UserMenu';
-import NewTaskScreen from './pages/Tasks/NewTask';
-import { View } from 'react-native';
 import HeaderBackButton from './components/HeaderBackButton';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import NewHabitScreen from './pages/Habits/NewHabit';
 
 const Drawer = createDrawerNavigator();
 
@@ -28,11 +27,11 @@ export default function App() {
     return (
         <GestureHandlerRootView>
             <NavigationContainer>
-                <AuthContextProvider>
+                <AppContextProvider>
                     <PaperProvider theme={AppTheme}>
                         <Root />
                     </PaperProvider>
-                </AuthContextProvider>
+                </AppContextProvider>
             </NavigationContainer>
         </GestureHandlerRootView>
     );
@@ -110,12 +109,21 @@ function Root() {
             />
 
             <Drawer.Screen
-                name='Gratitude'
-                component={GratitudeScreen}
+                name='New habit'
+                component={NewHabitScreen}
+                options={{
+                    headerLeft: () => <HeaderBackButton />,
+                    drawerItemStyle: { display: 'none' },
+                }}
+            />
+
+            <Drawer.Screen
+                name='Journal'
+                component={JournalScreen}
                 options={{
                     drawerIcon: ({ color, size, focused }) => (
                         <Icon
-                            source={'heart'}
+                            source={'notebook'}
                             color={color}
                             size={size}
                         />

@@ -15,6 +15,9 @@ import { StyleSheet, View } from 'react-native';
 import AppTheme, { COLORS } from '../../../Theme';
 import { DateTime } from 'luxon';
 import { DatePickerInput } from 'react-native-paper-dates';
+import { isValidDateString } from '../../../Util';
+import LS from '../../../LocalStorage';
+import { useAppContext } from '../../../contexts/AppContext';
 
 type EditDialogProps = {
     open: boolean;
@@ -23,6 +26,9 @@ type EditDialogProps = {
 };
 
 export default function EditDialog({ open, setOpen, task }: EditDialogProps) {
+    const reloadTasksFromStorage = useAppContext(s => s.reloadTasksFromStorage);
+
+    const [busy, setBusy] = useState<boolean>(false);
     const { errors, validate } = useErrorStack();
 
     const [date, setDate] = useState<Date | undefined>(undefined);
@@ -36,6 +42,40 @@ export default function EditDialog({ open, setOpen, task }: EditDialogProps) {
             setColor(task.color);
         }
     }, [task]);
+
+    async function handleSave() {
+        if (!task) return;
+
+        setBusy(true);
+
+        const freshTask: Task = {
+            ...task,
+            color,
+            description,
+            date: DateTime.fromJSDate(date as Date).toFormat('yyyy-LL-dd'),
+            updatedAt: DateTime.now().toMillis(),
+        };
+
+        const v1 = validate(
+            'date',
+            isValidDateString(task.date),
+            'A valid date is required'
+        );
+
+        const v2 = validate(
+            'description',
+            description.length > 0,
+            'Description is required'
+        );
+
+        if (v1 && v2) {
+            await LS.tasks.updateTask(freshTask);
+            await reloadTasksFromStorage();
+            setOpen(false);
+        }
+
+        setBusy(false);
+    }
 
     return (
         <Portal>
@@ -108,11 +148,12 @@ export default function EditDialog({ open, setOpen, task }: EditDialogProps) {
                 <Dialog.Actions>
                     <Button onPress={() => setOpen(false)}>Cancel</Button>
                     <Button
-                        onPress={() => setOpen(false)}
+                        onPress={handleSave}
                         mode='contained'
                         style={{ backgroundColor: COLORS[color] }}
+                        loading={busy}
                     >
-                        Done
+                        Save
                     </Button>
                 </Dialog.Actions>
             </Dialog>

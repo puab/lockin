@@ -1,6 +1,6 @@
 import { Button, Divider, HelperText, Text } from 'react-native-paper';
 import PageLayout from '../../components/PageLayout';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import HeaderBackButton from '../../components/HeaderBackButton';
 import FormTextField from '../../components/FormTextField';
 import { DatePickerInput } from 'react-native-paper-dates';
@@ -27,7 +27,7 @@ export default function NewTaskScreen({ route, navigation }) {
             : undefined
     );
 
-    useEffect(() => {
+    useMemo(() => {
         if (currentDateMs) {
             setDate(DateTime.fromMillis(route.params.currentDateMs).toJSDate());
         }
@@ -36,11 +36,20 @@ export default function NewTaskScreen({ route, navigation }) {
     const [description, setDescription] = useState<string>('');
     const [color, setColor] = useState<string>('white');
 
+    function reset() {
+        setDate(undefined);
+        setDescription('');
+        setColor('white');
+    }
+
     useEffect(() => {
         navigation?.setOptions({
             headerLeft: () => (
                 <HeaderBackButton
-                    onPress={() => navigation.navigate('Tasklist')}
+                    onPress={() => {
+                        navigation.navigate('Tasklist');
+                        reset();
+                    }}
                 />
             ),
         });
@@ -69,8 +78,8 @@ export default function NewTaskScreen({ route, navigation }) {
 
         const v1 = validate(
             'date',
-            !!task.date.match(/^\d{4}-\d{2}-\d{2}$/),
-            'Date is required'
+            isValidDateString(task.date),
+            'A valid date is required'
         );
 
         const v2 = validate(
@@ -80,12 +89,10 @@ export default function NewTaskScreen({ route, navigation }) {
         );
 
         if (v1 && v2) {
-            await LS.createTask(task);
+            await LS.tasks.createTask(task);
             await reloadTasksFromStorage();
             navigation.navigate('Tasklist');
-            setDate(undefined);
-            setDescription('');
-            setColor('white');
+            reset();
         }
 
         setBusy(false);

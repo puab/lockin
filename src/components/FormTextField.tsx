@@ -9,6 +9,9 @@ type FormTextFieldProps = {
     onChange?: (text: string) => void;
     numberOfLines?: number;
     multiline?: boolean;
+    style?: any;
+    disabled?: boolean;
+    editable?: boolean;
 };
 
 export default function FormTextField({
@@ -19,9 +22,12 @@ export default function FormTextField({
     onChange,
     numberOfLines,
     multiline,
+    style,
+    disabled,
+    editable,
 }: FormTextFieldProps) {
     return (
-        <View>
+        <View style={style}>
             <TextInput
                 label={label}
                 secureTextEntry={password}
@@ -31,7 +37,9 @@ export default function FormTextField({
                 mode='outlined'
                 numberOfLines={numberOfLines}
                 multiline={multiline}
-                style={{ maxHeight: 150 }}
+                style={[{ maxHeight: 150 }]}
+                disabled={disabled}
+                editable={editable}
             />
 
             {errors?.map((err, idx) => (

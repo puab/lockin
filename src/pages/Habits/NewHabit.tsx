@@ -1,0 +1,140 @@
+import { Button, Divider, Icon, Text } from 'react-native-paper';
+import PageLayout from '../../components/PageLayout';
+import { useEffect, useState } from 'react';
+import HeaderBackButton from '../../components/HeaderBackButton';
+import AppTheme, { COLORS } from '../../Theme';
+import ColorSelector from '../../components/ColorSelector';
+import useErrorStack from '../../hooks/useErrorStack';
+import FormTextField from '../../components/FormTextField';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import DailyGoalControl from './components/DailyGoalControl';
+import IconSelector, { ICONS } from './components/IconSelector';
+import { Habit } from './Types';
+import { uuid } from '../../Util';
+import { DateTime } from 'luxon';
+import LS from '../../LocalStorage';
+import { useAppContext } from '../../contexts/AppContext';
+
+export default function NewHabitScreen({ navigation }) {
+    const reloadHabitsFromStorage = useAppContext(
+        s => s.reloadHabitsFromStorage
+    );
+    const { errors, validate } = useErrorStack();
+    const [busy, setBusy] = useState<boolean>(false);
+
+    const [name, setName] = useState<string>('');
+    const [description, setDescription] = useState<string>('');
+    const [dailyGoal, setDailyGoal] = useState<number>(1);
+    const [icon, setIcon] = useState<string>(ICONS[0]);
+    const [color, setColor] = useState<string>('white');
+
+    function reset() {
+        setName('');
+        setDescription('');
+        setDailyGoal(1);
+        setIcon(ICONS[0]);
+        setColor('white');
+    }
+
+    useEffect(() => {
+        navigation?.setOptions({
+            headerLeft: () => (
+                <HeaderBackButton
+                    onPress={() => {
+                        navigation.navigate('Habits');
+                        reset();
+                    }}
+                />
+            ),
+        });
+    }, []);
+
+    useEffect(() => {
+        navigation?.setOptions({
+            headerRight: () => (
+                <View style={{ marginRight: 15 }}>
+                    <IconSelector
+                        value={icon}
+                        onChange={setIcon}
+                    />
+                </View>
+            ),
+        });
+    }, [icon]);
+
+    useEffect(() => {
+        navigation?.setOptions({
+            headerStyle: {
+                backgroundColor: COLORS[color],
+            },
+        });
+    }, [color]);
+
+    async function handleCreate() {
+        setBusy(true);
+
+        const habit: Habit = {
+            id: uuid(),
+            name,
+            description,
+            icon,
+            color,
+            dailyGoal,
+            completionMatrix: {},
+            createdAt: DateTime.now().toMillis(),
+            updatedAt: DateTime.now().toMillis(),
+        };
+
+        const v1 = validate('name', name.length > 0, 'Name is required');
+
+        if (v1) {
+            await LS.habits.createHabit(habit);
+            await reloadHabitsFromStorage();
+            navigation.navigate('Habits');
+            reset();
+        }
+
+        setBusy(false);
+    }
+
+    return (
+        <PageLayout style={{ padding: 10, gap: 10 }}>
+            <FormTextField
+                label='Name'
+                value={name}
+                onChange={setName}
+                errors={errors.name}
+            />
+
+            <FormTextField
+                label='Description'
+                value={description}
+                onChange={setDescription}
+                numberOfLines={5}
+                multiline
+            />
+
+            <DailyGoalControl
+                value={dailyGoal}
+                setValue={setDailyGoal}
+            />
+
+            <Divider style={{ marginTop: 'auto' }} />
+
+            <ColorSelector
+                value={color}
+                onChange={setColor}
+            />
+
+            <Button
+                mode='contained'
+                style={{ backgroundColor: COLORS[color] }}
+                loading={busy}
+                onPress={handleCreate}
+                icon={icon}
+            >
+                Create
+            </Button>
+        </PageLayout>
+    );
+}

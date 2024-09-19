@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Task } from '../Types';
 import API from '../../../API';
 import LoaderPlaceholder from '../../../components/LoaderPlaceholder';
@@ -23,9 +23,9 @@ export default function TaskList({
 }: TaskListProps) {
     const tasks = useAppContext<Task[]>(s => s.tasks);
 
-    const displayTasks = tasks.filter(
-        t => t.date === active.toFormat('yyyy-LL-dd')
-    );
+    const activeDateStr = active.toFormat('yyyy-LL-dd');
+
+    const displayTasks = tasks.filter(t => t.date === activeDateStr);
 
     return (
         <ScrollView style={list.scrollView}>
@@ -70,6 +70,8 @@ type TaskEntryProps = {
 };
 
 function TaskEntry({ task, onEdit, onDelete }: TaskEntryProps) {
+    const [expandedDesc, setExpandedDesc] = useState<boolean>(false);
+
     const taskHex = COLORS[task.color];
     const reloadTasksFromStorage = useAppContext(s => s.reloadTasksFromStorage);
 
@@ -80,7 +82,7 @@ function TaskEntry({ task, onEdit, onDelete }: TaskEntryProps) {
 
     async function toggleTask() {
         setInnerCompleted(c => !c);
-        await LS.toggleTask(task.id);
+        await LS.tasks.toggleTask(task.id);
         await reloadTasksFromStorage();
     }
 
@@ -102,7 +104,14 @@ function TaskEntry({ task, onEdit, onDelete }: TaskEntryProps) {
                 </View>
 
                 <View style={entry.right}>
-                    <Text style={entry.description}>{task.description}</Text>
+                    <TouchableOpacity onPress={() => setExpandedDesc(e => !e)}>
+                        <Text
+                            style={entry.description}
+                            numberOfLines={!expandedDesc ? 3 : undefined}
+                        >
+                            {task.description}
+                        </Text>
+                    </TouchableOpacity>
                 </View>
             </View>
         </GestureDetector>
