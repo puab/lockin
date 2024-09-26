@@ -1,21 +1,35 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { FlatListComponent, ScrollView, StyleSheet, View } from 'react-native';
 import { Habit } from '../Types';
 import AppTheme, { COLORS } from '../../../Theme';
-import { Icon, Text } from 'react-native-paper';
-import { useState } from 'react';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { Icon, Menu, Text } from 'react-native-paper';
+import { useEffect, useState } from 'react';
+import {
+    Gesture,
+    GestureDetector,
+    TouchableOpacity,
+} from 'react-native-gesture-handler';
 import HabitCalendar from './HabitCalendar';
 import { DateNow, DateNowStr } from '../../../Util';
 
 type HabitItemProps = {
     habit: Habit;
     wantsCompletion: () => void;
+    wantsEdit: () => void;
+    wantsDelete: () => void;
+    wantsFakeData: () => void;
 };
 
-export default function HabitItem({ habit, wantsCompletion }: HabitItemProps) {
+export default function HabitItem({
+    habit,
+    wantsCompletion,
+    wantsEdit,
+    wantsDelete,
+    wantsFakeData,
+}: HabitItemProps) {
     const habitHex = COLORS[habit.color];
 
     const [expandedDesc, setExpandedDesc] = useState<boolean>(false);
+    const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
     const headerLeft = (
         <View style={S.headerLeft}>
@@ -45,35 +59,96 @@ export default function HabitItem({ habit, wantsCompletion }: HabitItemProps) {
         </View>
     );
 
-    const completionToday = habit[DateNowStr];
+    const [countToday, setCountToday] = useState<number>(
+        habit.completionMatrix[DateNowStr] ?? 0
+    );
+
+    useEffect(() => {
+        setCountToday(habit.completionMatrix[DateNowStr] ?? 0);
+    }, [habit.completionMatrix[DateNowStr]]);
+
+    function handleComplete() {
+        setCountToday(c => (c < habit.dailyGoal ? c + 1 : c));
+        wantsCompletion();
+    }
+
+    const longPress = Gesture.LongPress()
+        .runOnJS(true)
+        .onStart(() => setMenuOpen(true));
+
+    const el = (
+        <GestureDetector gesture={longPress}>
+            <View style={[S.container, { borderColor: habitHex }]}>
+                <View style={S.header}>
+                    {headerLeft}
+
+                    <TouchableOpacity onPress={handleComplete}>
+                        <View style={S.completionCorner}>
+                            <Text>
+                                {countToday} / {habit.dailyGoal}
+                            </Text>
+                            <Icon
+                                source={
+                                    countToday == habit.dailyGoal
+                                        ? 'check'
+                                        : 'plus'
+                                }
+                                color='white'
+                                size={24}
+                            />
+                        </View>
+                    </TouchableOpacity>
+                </View>
+
+                <ScrollView
+                    horizontal
+                    style={{ paddingBottom: 5 }}
+                >
+                    <HabitCalendar
+                        habit={habit}
+                        completionCountToday={countToday}
+                    />
+                </ScrollView>
+            </View>
+        </GestureDetector>
+    );
 
     return (
-        <View style={[S.container, { borderColor: habitHex }]}>
-            <View style={S.header}>
-                {headerLeft}
-
-                <TouchableOpacity onPress={wantsCompletion}>
-                    <View style={S.completionCorner}>
-                        <Text>
-                            {completionToday ? completionToday : 0} /{' '}
-                            {habit.dailyGoal}
-                        </Text>
-                        <Icon
-                            source={'plus'}
-                            color='white'
-                            size={24}
-                        />
-                    </View>
-                </TouchableOpacity>
-            </View>
-
-            <ScrollView
-                horizontal
-                style={{ paddingBottom: 5 }}
-            >
-                <HabitCalendar habit={habit} />
-            </ScrollView>
-        </View>
+        <Menu
+            visible={menuOpen}
+            onDismiss={() => setMenuOpen(false)}
+            mode='elevated'
+            anchorPosition='bottom'
+            anchor={el}
+            style={{ marginLeft: 50, marginTop: '-25%' }}
+        >
+            <Menu.Item
+                onPress={() => {
+                    setMenuOpen(false);
+                    wantsEdit();
+                }}
+                title='Edit'
+                leadingIcon='pencil'
+            />
+            <Menu.Item
+                onPress={() => {
+                    setMenuOpen(false);
+                    wantsDelete();
+                }}
+                title='Delete'
+                leadingIcon='delete'
+                titleStyle={{ color: 'red' }}
+                theme={{ colors: { onSurfaceVariant: 'red' } }}
+            />
+            <Menu.Item
+                onPress={() => {
+                    setMenuOpen(false);
+                    wantsFakeData();
+                }}
+                title='Generate fake data'
+                leadingIcon='data-matrix'
+            />
+        </Menu>
     );
 }
 

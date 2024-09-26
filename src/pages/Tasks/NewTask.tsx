@@ -37,7 +37,6 @@ export default function NewTaskScreen({ route, navigation }) {
     const [color, setColor] = useState<string>('white');
 
     function reset() {
-        setDate(undefined);
         setDescription('');
         setColor('white');
     }

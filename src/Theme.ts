@@ -1,8 +1,8 @@
 import { MD3DarkTheme, MD3Theme } from 'react-native-paper';
 
 export const COLORS: { [key: string]: string } = {
-    white: '#fff',
-    red: '#f66',
+    white: '#ffffff',
+    red: '#f66666',
     orange: '#ff9466',
     yellow: '#fffc66',
     green: '#66ff78',
@@ -12,6 +12,27 @@ export const COLORS: { [key: string]: string } = {
     purple: '#ab66ff',
     pink: '#e866ff',
 };
+
+export const ICONS = [
+    'dumbbell',
+    'chart-line',
+    'alarm',
+    'food-apple',
+    'wallet',
+    'heart',
+    'coffee',
+    'xml',
+    'shower',
+    'bike',
+    'currency-usd',
+    'book',
+    'heart-flash',
+    'walk',
+    'controller-classic',
+    'leaf',
+    'snowflake',
+    'text',
+];
 
 const AppTheme: MD3Theme = {
     ...MD3DarkTheme,

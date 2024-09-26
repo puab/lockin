@@ -1,4 +1,4 @@
-import { Keyboard, StyleSheet, View } from 'react-native';
+import { Keyboard, StyleSheet, View, ViewStyle } from 'react-native';
 import { COLORS } from '../Theme';
 import { Text } from 'react-native-paper';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -6,11 +6,16 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 type ColorSelectorProps = {
     value: string;
     onChange: (c: string) => void;
+    style?: ViewStyle;
 };
 
-export default function ColorSelector({ value, onChange }: ColorSelectorProps) {
+export default function ColorSelector({
+    value,
+    onChange,
+    style,
+}: ColorSelectorProps) {
     return (
-        <View style={S.container}>
+        <View style={[S.container, style]}>
             {Object.entries(COLORS).map(([val, hex], idx) => {
                 const selected = val === value;
 

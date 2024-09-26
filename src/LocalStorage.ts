@@ -122,10 +122,89 @@ class Habits {
         }
     }
 
+    async updateHabit(freshHabit: Habit): Promise<void> {
+        try {
+            const curHabits = await this.getHabits();
+            const newHabits = curHabits.map(t =>
+                t.id === freshHabit.id ? freshHabit : t
+            );
+
+            await AsyncStorage.setItem('habits', JSON.stringify(newHabits));
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
     async deleteHabit(habit: Habit): Promise<void> {
         try {
             const curHabits = await this.getHabits();
             const newHabits = curHabits.filter(h => h.id != habit.id);
+
+            await AsyncStorage.setItem('habits', JSON.stringify(newHabits));
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    async addCompletionToHabit(habit: Habit, dayStr: string = 'today') {
+        if (dayStr == 'today') {
+            dayStr = DateTime.now().toFormat('yyyy-LL-dd');
+        }
+
+        try {
+            const curHabits = await this.getHabits();
+            const newHabits = curHabits.map(h => {
+                if (h.id === habit.id) {
+                    const { completionMatrix } = h;
+
+                    if (!completionMatrix[dayStr]) {
+                        completionMatrix[dayStr] = 1;
+                    } else {
+                        if (completionMatrix[dayStr] < h.dailyGoal) {
+                            completionMatrix[dayStr]++;
+                        }
+                    }
+
+                    return {
+                        ...h,
+                        completionMatrix,
+                        updatedAt: DateTime.now().toMillis(),
+                    };
+                }
+
+                return h;
+            });
+
+            await AsyncStorage.setItem('habits', JSON.stringify(newHabits));
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    async populateFakeCompletion(habit: Habit, days: number) {
+        const start = DateTime.now();
+
+        const dayStrs = [...new Array(days)].map((_, idx) => {
+            return start.minus({ days: idx }).toFormat('yyyy-LL-dd');
+        });
+
+        const matrix = {};
+
+        for (const str of dayStrs) {
+            matrix[str] = Math.round(Math.random() * habit.dailyGoal);
+        }
+
+        console.log(matrix);
+
+        try {
+            const curHabits = await this.getHabits();
+            const newHabits = curHabits.map(h => {
+                if (h.id === habit.id) {
+                    h.completionMatrix = matrix;
+                }
+
+                return h;
+            });
 
             await AsyncStorage.setItem('habits', JSON.stringify(newHabits));
         } catch (e) {

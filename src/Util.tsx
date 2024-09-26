@@ -10,7 +10,7 @@ export const habitDays = (() => {
     const start = DateTime.now();
 
     return [...new Array(500)].map((_, idx) => {
-        return start.minus({ days: idx + 1 }).toFormat('yyyy-LL-dd');
+        return start.minus({ days: idx }).toFormat('yyyy-LL-dd');
     });
 })();
 

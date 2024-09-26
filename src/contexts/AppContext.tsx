@@ -77,7 +77,6 @@ export function AppContextProvider({ children }) {
     }
 
     async function reloadHabitsFromStorage() {
-        await delay(2000);
         const lsHabits = await LS.habits.getHabits();
         setHabits(lsHabits);
     }

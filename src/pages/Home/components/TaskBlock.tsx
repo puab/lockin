@@ -7,6 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { DateNow, pluralize } from '../../../Util';
 import { DateTime } from 'luxon';
+import Block from './Block';
 
 export default function TaskBlock() {
     const tasksToday = useAppContext<Task[]>(s => s.tasks).filter(
@@ -21,7 +22,7 @@ export default function TaskBlock() {
     const completedCount = tasksToday.filter(t => t.completed).length;
 
     return (
-        <TouchableOpacity
+        <Block
             style={S.container}
             onPress={goToTasks}
         >
@@ -38,10 +39,10 @@ export default function TaskBlock() {
                 <Icon
                     source={'menu-right'}
                     size={48}
-                    color='black'
+                    color={AppTheme.colors.primary}
                 />
             </View>
-        </TouchableOpacity>
+        </Block>
     );
 }
 
@@ -49,7 +50,7 @@ const S = StyleSheet.create({
     container: {
         padding: 5,
         paddingLeft: 15,
-        backgroundColor: AppTheme.colors.primary,
+        backgroundColor: AppTheme.colors.inverseOnSurface,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -60,5 +61,5 @@ const S = StyleSheet.create({
         gap: 10,
         alignItems: 'center',
     },
-    text: { color: 'black', fontSize: 18 },
+    text: { color: AppTheme.colors.primary, fontSize: 18 },
 });

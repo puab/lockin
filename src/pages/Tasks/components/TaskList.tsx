@@ -9,6 +9,7 @@ import { DateTime } from 'luxon';
 import AppTheme, { COLORS } from '../../../Theme';
 import LS from '../../../LocalStorage';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import TaskEntry from './TaskEntry';
 
 type TaskListProps = {
     active: DateTime;
@@ -40,8 +41,8 @@ export default function TaskList({
                             <TaskEntry
                                 key={`te${t.id}`}
                                 task={t}
-                                onEdit={wantsEdit}
-                                onDelete={wantsDelete}
+                                wantsEdit={() => wantsEdit(t)}
+                                wantsDelete={() => wantsDelete(t)}
                             />
                         );
                     })
@@ -61,106 +62,4 @@ const list = StyleSheet.create({
         paddingTop: 5,
         paddingBottom: 50,
     },
-});
-
-type TaskEntryProps = {
-    task: Task;
-    onEdit: (task: Task) => void;
-    onDelete: (task: Task) => void;
-};
-
-function TaskEntry({ task, onEdit, onDelete }: TaskEntryProps) {
-    const [expandedDesc, setExpandedDesc] = useState<boolean>(false);
-
-    const taskHex = COLORS[task.color];
-    const reloadTasksFromStorage = useAppContext(s => s.reloadTasksFromStorage);
-
-    const [menuOpen, setMenuOpen] = useState<boolean>(false);
-    const [innerCompleted, setInnerCompleted] = useState<boolean>(
-        task.completed
-    );
-
-    async function toggleTask() {
-        setInnerCompleted(c => !c);
-        await LS.tasks.toggleTask(task.id);
-        await reloadTasksFromStorage();
-    }
-
-    const longPress = Gesture.LongPress()
-        .runOnJS(true)
-        .onStart(() => setMenuOpen(true));
-
-    const el = (
-        <GestureDetector gesture={longPress}>
-            <View style={[entry.container, { borderLeftColor: taskHex }]}>
-                <View style={entry.left}>
-                    <RadioButton
-                        value={task.id}
-                        status={innerCompleted ? 'checked' : 'unchecked'}
-                        color={taskHex}
-                        uncheckedColor={taskHex}
-                        onPress={toggleTask}
-                    />
-                </View>
-
-                <View style={entry.right}>
-                    <TouchableOpacity onPress={() => setExpandedDesc(e => !e)}>
-                        <Text
-                            style={entry.description}
-                            numberOfLines={!expandedDesc ? 3 : undefined}
-                        >
-                            {task.description}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-        </GestureDetector>
-    );
-
-    return (
-        <Menu
-            visible={menuOpen}
-            onDismiss={() => setMenuOpen(false)}
-            mode='elevated'
-            anchorPosition='bottom'
-            anchor={el}
-            style={{ marginLeft: 50 }}
-        >
-            <Menu.Item
-                onPress={() => {
-                    setMenuOpen(false);
-                    onEdit(task);
-                }}
-                title='Edit'
-                leadingIcon='pencil'
-            />
-            <Menu.Item
-                onPress={() => {
-                    setMenuOpen(false);
-                    onDelete(task);
-                }}
-                title='Delete'
-                leadingIcon='delete'
-                titleStyle={{ color: 'red' }}
-                theme={{ colors: { onSurfaceVariant: 'red' } }}
-            />
-        </Menu>
-    );
-}
-
-const entry = StyleSheet.create({
-    container: {
-        flexDirection: 'row',
-        gap: 5,
-        borderLeftWidth: 3,
-        backgroundColor: AppTheme.colors.inverseOnSurface,
-        borderRadius: 5,
-    },
-    left: {},
-    right: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flexShrink: 1,
-    },
-    description: {},
 });

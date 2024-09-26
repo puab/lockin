@@ -62,11 +62,12 @@ export default function TasksScreen({ route, navigation }) {
             {curDate.startOf('day').toMillis() >=
                 DateNow.startOf('day').toMillis() && (
                 <AddItemButton
-                    onPress={() =>
+                    onPress={() => {
+                        setJustDeleted(false);
                         navigation?.navigate('New task', {
                             currentDateMs: curDate.toMillis(),
-                        })
-                    }
+                        });
+                    }}
                 />
             )}
 
@@ -77,11 +78,16 @@ export default function TasksScreen({ route, navigation }) {
 
             <Divider />
 
-            <TaskList
-                active={curDate}
-                wantsEdit={wantsEdit}
-                wantsDelete={wantsDelete}
-            />
+            {useMemo(
+                () => (
+                    <TaskList
+                        active={curDate}
+                        wantsEdit={wantsEdit}
+                        wantsDelete={wantsDelete}
+                    />
+                ),
+                [curDate]
+            )}
 
             {useMemo(
                 () => (

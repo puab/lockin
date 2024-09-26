@@ -1,35 +1,19 @@
 import { useState } from 'react';
 import { StyleSheet, TouchableOpacity } from 'react-native';
 import { Button, Dialog, Icon, Portal, Text } from 'react-native-paper';
-import AppTheme from '../../../Theme';
+import AppTheme, { ICONS } from '../../../Theme';
 
 type IconSelectorProps = {
     value: string;
     onChange: (value: string) => void;
+    iconColor?: string;
 };
 
-export const ICONS = [
-    'dumbbell',
-    'chart-line',
-    'alarm',
-    'food-apple',
-    'wallet',
-    'heart',
-    'coffee',
-    'xml',
-    'shower',
-    'bike',
-    'currency-usd',
-    'book',
-    'heart-flash',
-    'walk',
-    'controller-classic',
-    'leaf',
-    'snowflake',
-    'text',
-];
-
-export default function IconSelector({ value, onChange }: IconSelectorProps) {
+export default function IconSelector({
+    value,
+    onChange,
+    iconColor = 'black',
+}: IconSelectorProps) {
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
 
     return (
@@ -38,7 +22,7 @@ export default function IconSelector({ value, onChange }: IconSelectorProps) {
                 <Icon
                     source={value}
                     size={24}
-                    color='black'
+                    color={iconColor}
                 />
             </TouchableOpacity>
             <Portal>
