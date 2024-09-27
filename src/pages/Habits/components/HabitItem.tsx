@@ -30,6 +30,7 @@ export default function HabitItem({
 
     const [expandedDesc, setExpandedDesc] = useState<boolean>(false);
     const [menuOpen, setMenuOpen] = useState<boolean>(false);
+    const [busy, setBusy] = useState<boolean>(false);
 
     const headerLeft = (
         <View style={S.headerLeft}>
@@ -59,18 +60,7 @@ export default function HabitItem({
         </View>
     );
 
-    const [countToday, setCountToday] = useState<number>(
-        habit.completionMatrix[DateNowStr] ?? 0
-    );
-
-    useEffect(() => {
-        setCountToday(habit.completionMatrix[DateNowStr] ?? 0);
-    }, [habit.completionMatrix[DateNowStr]]);
-
-    function handleComplete() {
-        setCountToday(c => (c < habit.dailyGoal ? c + 1 : c));
-        wantsCompletion();
-    }
+    const countToday = habit.completionMatrix[DateNowStr] ?? 0;
 
     const longPress = Gesture.LongPress()
         .runOnJS(true)
@@ -82,7 +72,7 @@ export default function HabitItem({
                 <View style={S.header}>
                     {headerLeft}
 
-                    <TouchableOpacity onPress={handleComplete}>
+                    <TouchableOpacity onPress={wantsCompletion}>
                         <View style={S.completionCorner}>
                             <Text>
                                 {countToday} / {habit.dailyGoal}
@@ -104,10 +94,7 @@ export default function HabitItem({
                     horizontal
                     style={{ paddingBottom: 5 }}
                 >
-                    <HabitCalendar
-                        habit={habit}
-                        completionCountToday={countToday}
-                    />
+                    <HabitCalendar habit={habit} />
                 </ScrollView>
             </View>
         </GestureDetector>

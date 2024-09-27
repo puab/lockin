@@ -1,11 +1,4 @@
-import {
-    Button,
-    Dialog,
-    HelperText,
-    Portal,
-    Text,
-    TextInput,
-} from 'react-native-paper';
+import { Button, Dialog, HelperText, Portal } from 'react-native-paper';
 import { Task } from '../Types';
 import { useEffect, useState } from 'react';
 import useErrorStack from '../../../hooks/useErrorStack';
@@ -16,8 +9,9 @@ import AppTheme, { COLORS } from '../../../Theme';
 import { DateTime } from 'luxon';
 import { DatePickerInput } from 'react-native-paper-dates';
 import { isValidDateString } from '../../../Util';
-import LS from '../../../LocalStorage';
 import { useAppContext } from '../../../contexts/AppContext';
+import { useAppStore } from '../../../store';
+import { useShallow } from 'zustand/react/shallow';
 
 type EditDialogProps = {
     open: boolean;
@@ -26,7 +20,8 @@ type EditDialogProps = {
 };
 
 export default function EditDialog({ open, setOpen, task }: EditDialogProps) {
-    const reloadTasksFromStorage = useAppContext(s => s.reloadTasksFromStorage);
+    const tasks = useAppStore(s => s.tasks);
+    const updateTask = useAppStore(useShallow(s => s.updateTask));
 
     const [busy, setBusy] = useState<boolean>(false);
     const { errors, validate } = useErrorStack();
@@ -43,7 +38,7 @@ export default function EditDialog({ open, setOpen, task }: EditDialogProps) {
         }
     }, [task]);
 
-    async function handleSave() {
+    function handleSave() {
         if (!task) return;
 
         setBusy(true);
@@ -69,8 +64,7 @@ export default function EditDialog({ open, setOpen, task }: EditDialogProps) {
         );
 
         if (v1 && v2) {
-            await LS.tasks.updateTask(freshTask);
-            await reloadTasksFromStorage();
+            updateTask(freshTask);
             setOpen(false);
         }
 

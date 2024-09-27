@@ -4,24 +4,19 @@ import { DateNow } from '../../Util';
 import DateRow from './components/DateRow';
 import { DateTime } from 'luxon';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import {
-    Button,
-    Dialog,
-    Divider,
-    FAB,
-    Portal,
-    Snackbar,
-    Text,
-} from 'react-native-paper';
+import { Divider, Portal, Snackbar, Text } from 'react-native-paper';
 import TaskList from './components/TaskList';
 import { Task } from './Types';
 import EditDialog from './components/EditDialog';
-import LS from '../../LocalStorage';
-import { useAppContext } from '../../contexts/AppContext';
 import AddItemButton from '../../components/AddItemButton';
+import { useAppStore } from '../../store';
+import { useShallow } from 'zustand/react/shallow';
 
 export default function TasksScreen({ route, navigation }) {
-    const reloadTasksFromStorage = useAppContext(s => s.reloadTasksFromStorage);
+    const [deleteTask, addTask] = useAppStore(
+        useShallow(s => [s.deleteTask, s.addTask])
+    );
+
     const currentDateMs = route?.params?.currentDateMs;
 
     const [curDate, setCurDate] = useState<DateTime>(
@@ -50,10 +45,9 @@ export default function TasksScreen({ route, navigation }) {
 
     const [justDeleted, setJustDeleted] = useState<boolean>(false);
     const deleteTargetRef = useRef<Task | null>(null);
-    async function wantsDelete(task: Task) {
+    function wantsDelete(task: Task) {
         deleteTargetRef.current = task;
-        await LS.tasks.deleteTask(task);
-        await reloadTasksFromStorage();
+        deleteTask(task);
         setJustDeleted(true);
     }
 
@@ -111,12 +105,9 @@ export default function TasksScreen({ route, navigation }) {
                             }}
                             action={{
                                 label: 'Undo',
-                                onPress: async () => {
+                                onPress: () => {
                                     if (deleteTargetRef.current) {
-                                        await LS.tasks.createTask(
-                                            deleteTargetRef.current
-                                        ),
-                                            await reloadTasksFromStorage();
+                                        addTask(deleteTargetRef.current);
                                     }
                                 },
                             }}
@@ -132,5 +123,7 @@ export default function TasksScreen({ route, navigation }) {
 }
 
 const S = StyleSheet.create({
-    page: { padding: 5, paddingBottom: 0 },
+    page: {
+        paddingTop: 5,
+    },
 });

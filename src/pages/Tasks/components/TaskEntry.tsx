@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Task } from '../Types';
-import { useAppContext } from '../../../contexts/AppContext';
 import AppTheme, { COLORS } from '../../../Theme';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Menu, RadioButton, Text } from 'react-native-paper';
-import LS from '../../../LocalStorage';
+import { useAppStore } from '../../../store';
+import { useShallow } from 'zustand/react/shallow';
 
 type TaskEntryProps = {
     task: Task;
@@ -18,33 +18,32 @@ export default function TaskEntry({
     wantsEdit,
     wantsDelete,
 }: TaskEntryProps) {
+    const toggleTaskCompletion = useAppStore(
+        useShallow(s => s.toggleTaskCompletion)
+    );
+
     const [expandedDesc, setExpandedDesc] = useState<boolean>(false);
 
     const taskHex = COLORS[task.color];
-    const reloadTasksFromStorage = useAppContext(s => s.reloadTasksFromStorage);
 
     const [menuOpen, setMenuOpen] = useState<boolean>(false);
-    const [innerCompleted, setInnerCompleted] = useState<boolean>(
-        task.completed
-    );
 
-    async function toggleTask() {
-        setInnerCompleted(c => !c);
-        await LS.tasks.toggleTask(task.id);
-        await reloadTasksFromStorage();
+    function toggleTask() {
+        toggleTaskCompletion(task);
     }
 
-    const longPress = Gesture.LongPress()
+    const doubleTap = Gesture.Tap()
+        .numberOfTaps(2)
         .runOnJS(true)
         .onStart(() => setMenuOpen(true));
 
     const el = (
-        <GestureDetector gesture={longPress}>
+        <GestureDetector gesture={doubleTap}>
             <View style={[entry.container, { borderLeftColor: taskHex }]}>
                 <View style={entry.left}>
                     <RadioButton
                         value={task.id}
-                        status={innerCompleted ? 'checked' : 'unchecked'}
+                        status={task.completed ? 'checked' : 'unchecked'}
                         color={taskHex}
                         uncheckedColor={taskHex}
                         onPress={toggleTask}
@@ -52,14 +51,16 @@ export default function TaskEntry({
                 </View>
 
                 <View style={entry.right}>
-                    <TouchableOpacity onPress={() => setExpandedDesc(e => !e)}>
-                        <Text
-                            style={entry.description}
-                            numberOfLines={!expandedDesc ? 3 : undefined}
-                        >
-                            {task.description}
-                        </Text>
-                    </TouchableOpacity>
+                    {/* <TouchableOpacity
+                        onLongPress={() => setExpandedDesc(e => !e)}
+                    > */}
+                    <Text
+                        style={entry.description}
+                        numberOfLines={!expandedDesc ? 3 : undefined}
+                    >
+                        {task.description}
+                    </Text>
+                    {/* </TouchableOpacity> */}
                 </View>
             </View>
         </GestureDetector>
@@ -103,6 +104,10 @@ const entry = StyleSheet.create({
         borderLeftWidth: 3,
         backgroundColor: AppTheme.colors.inverseOnSurface,
         borderRadius: 5,
+        paddingVertical: 5,
+        paddingRight: 5,
+        marginBottom: 10,
+        marginHorizontal: 10,
     },
     left: {},
     right: {

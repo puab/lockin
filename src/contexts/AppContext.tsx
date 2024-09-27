@@ -11,50 +11,33 @@ import { Habit } from '../pages/Habits/Types';
 import { delay } from '../Util';
 import LoaderPlaceholder from '../components/LoaderPlaceholder';
 import PageLayout from '../components/PageLayout';
+import { useAppStore } from '../store';
 
 export type AppContextType = {
-    initialLoad: boolean;
-
     user: any;
     setUser: (u: any) => void;
     checkingUser: boolean;
     tryLoadUser: () => Promise<void>;
 
-    tasks: Task[];
-    reloadTasksFromStorage: () => Promise<void>;
-
-    habits: Habit[];
-    reloadHabitsFromStorage: () => Promise<void>;
-
     nav: NativeStackNavigationProp<any> | null;
 };
 
 const AppContext = createContext<AppContextType>({
-    initialLoad: true,
-
     user: null,
     setUser: () => {},
     checkingUser: false,
     tryLoadUser: async () => {},
 
-    tasks: [],
-    reloadTasksFromStorage: async () => {},
-
-    habits: [],
-    reloadHabitsFromStorage: async () => {},
-
     nav: null,
 });
 
 export function AppContextProvider({ children }) {
-    const [initialLoad, setInitialLoad] = useState<boolean>(true);
+    const isHydrated = useAppStore(s => s._hasHydrated);
+
     const nav = useNavigation<NativeStackNavigationProp<any>>();
 
     const [user, setUser] = useState<any>(null);
     const [checkingUser, setCheckingUser] = useState<boolean>(false);
-
-    const [tasks, setTasks] = useState<Task[]>([]);
-    const [habits, setHabits] = useState<Habit[]>([]);
 
     async function tryLoadUser() {
         try {
@@ -70,46 +53,18 @@ export function AppContextProvider({ children }) {
         }
     }
 
-    async function reloadTasksFromStorage() {
-        await LS.tasks.clearOldTasks();
-        const lsTasks = await LS.tasks.getTasks();
-        setTasks(lsTasks);
-    }
-
-    async function reloadHabitsFromStorage() {
-        const lsHabits = await LS.habits.getHabits();
-        setHabits(lsHabits);
-    }
-
-    useEffect(() => {
-        (async () => {
-            await Promise.all([
-                reloadTasksFromStorage(),
-                reloadHabitsFromStorage(),
-            ]);
-            setInitialLoad(false);
-        })();
-    }, []);
-
     return (
         <AppContext.Provider
             value={{
-                initialLoad,
-
                 user,
                 setUser,
                 checkingUser,
                 tryLoadUser,
+
                 nav,
-
-                tasks,
-                reloadTasksFromStorage,
-
-                habits,
-                reloadHabitsFromStorage,
             }}
         >
-            {initialLoad ? (
+            {!isHydrated ? (
                 <PageLayout>
                     <LoaderPlaceholder />
                 </PageLayout>

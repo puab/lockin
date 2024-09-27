@@ -8,15 +8,21 @@ class Tasks {
         try {
             const tasks = await AsyncStorage.getItem('tasks');
             if (tasks !== null) {
-                return JSON.parse(tasks).sort(
-                    (a: Task, b: Task) => a.createdAt - b.createdAt
-                );
+                return JSON.parse(tasks);
             }
 
             return [];
         } catch (e) {
             console.error(e);
             return [];
+        }
+    }
+
+    async overwriteTasks(tasks: Task[]): Promise<void> {
+        try {
+            await AsyncStorage.setItem('tasks', JSON.stringify(tasks));
+        } catch (e) {
+            console.error(e);
         }
     }
 
@@ -43,7 +49,7 @@ class Tasks {
             const curTasks = await this.getTasks();
             await AsyncStorage.setItem(
                 'tasks',
-                JSON.stringify([...curTasks, task])
+                JSON.stringify([task, ...curTasks])
             );
         } catch (e) {
             console.error(e);

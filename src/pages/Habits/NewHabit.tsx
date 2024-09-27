@@ -14,11 +14,12 @@ import { uuid } from '../../Util';
 import { DateTime } from 'luxon';
 import LS from '../../LocalStorage';
 import { useAppContext } from '../../contexts/AppContext';
+import { useAppStore } from '../../store';
+import { useShallow } from 'zustand/react/shallow';
 
 export default function NewHabitScreen({ navigation }) {
-    const reloadHabitsFromStorage = useAppContext(
-        s => s.reloadHabitsFromStorage
-    );
+    const addHabit = useAppStore(useShallow(s => s.addHabit));
+
     const { errors, validate } = useErrorStack();
     const [busy, setBusy] = useState<boolean>(false);
 
@@ -88,8 +89,7 @@ export default function NewHabitScreen({ navigation }) {
         const v1 = validate('name', name.length > 0, 'Name is required');
 
         if (v1) {
-            await LS.habits.createHabit(habit);
-            await reloadHabitsFromStorage();
+            addHabit(habit);
             navigation.navigate('Habits');
             reset();
         }

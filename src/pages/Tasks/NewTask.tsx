@@ -11,11 +11,11 @@ import AppTheme, { COLORS } from '../../Theme';
 import { Task } from './Types';
 import { isValidDateString, uuid } from '../../Util';
 import useErrorStack from '../../hooks/useErrorStack';
-import { useAppContext } from '../../contexts/AppContext';
-import LS from '../../LocalStorage';
+import { useAppStore } from '../../store';
+import { useShallow } from 'zustand/react/shallow';
 
 export default function NewTaskScreen({ route, navigation }) {
-    const reloadTasksFromStorage = useAppContext(s => s.reloadTasksFromStorage);
+    const addTask = useAppStore(useShallow(s => s.addTask));
     const [busy, setBusy] = useState<boolean>(false);
     const { errors, validate } = useErrorStack();
 
@@ -88,8 +88,7 @@ export default function NewTaskScreen({ route, navigation }) {
         );
 
         if (v1 && v2) {
-            await LS.tasks.createTask(task);
-            await reloadTasksFromStorage();
+            addTask(task);
             navigation.navigate('Tasklist');
             reset();
         }

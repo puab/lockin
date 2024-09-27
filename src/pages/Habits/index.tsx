@@ -2,45 +2,47 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import PageLayout from '../../components/PageLayout';
 import { Button, Portal, Snackbar, Text } from 'react-native-paper';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { COLORS } from '../../Theme';
 import { useAppContext } from '../../contexts/AppContext';
 import HabitItem from './components/HabitItem';
 import { Habit } from './Types';
 import LS from '../../LocalStorage';
 import { DateNowStr } from '../../Util';
 import EditDialog from './components/EditDialog';
+import { useAppStore } from '../../store';
+import { useShallow } from 'zustand/react/shallow';
 
 export default function HabitScreen({ navigation }) {
-    const habits = useAppContext<Habit[]>(s => s.habits);
-    const reloadHabitsFromStorage = useAppContext(
-        s => s.reloadHabitsFromStorage
+    const habits = useAppStore(s => s.habits);
+    const addCompletionToHabit = useAppStore(
+        useShallow(s => s.addCompletionToHabit)
     );
+    const deleteHabit = useAppStore(useShallow(s => s.deleteHabit));
+    const populateFakeCompletion = useAppStore(
+        useShallow(s => s.populateFakeCompletion)
+    );
+    const addHabit = useAppStore(useShallow(s => s.addHabit));
 
-    async function wantsCompletion(habit: Habit) {
-        if (habit.completionMatrix[DateNowStr] === habit.dailyGoal) return;
-        await LS.habits.addCompletionToHabit(habit);
-        await reloadHabitsFromStorage();
+    function wantsCompletion(habit: Habit) {
+        addCompletionToHabit(habit);
     }
 
     const [justDeleted, setJustDeleted] = useState<boolean>(false);
     const deleteTargetRef = useRef<Habit | null>(null);
-    async function wantsDelete(habit: Habit) {
+    function wantsDelete(habit: Habit) {
         deleteTargetRef.current = habit;
-        await LS.habits.deleteHabit(habit);
-        await reloadHabitsFromStorage();
+        deleteHabit(habit);
         setJustDeleted(true);
     }
 
     const [isEditing, setEditing] = useState<boolean>(false);
     const editTargetRef = useRef<Habit | null>(null);
-    async function wantsEdit(habit: Habit) {
+    function wantsEdit(habit: Habit) {
         editTargetRef.current = habit;
         setEditing(true);
     }
 
-    async function wantsFakeData(habit: Habit) {
-        await LS.habits.populateFakeCompletion(habit, 100);
-        await reloadHabitsFromStorage();
+    function wantsFakeData(habit: Habit) {
+        populateFakeCompletion(habit, 100);
     }
 
     useEffect(() => {
@@ -108,12 +110,9 @@ export default function HabitScreen({ navigation }) {
                             }}
                             action={{
                                 label: 'Undo',
-                                onPress: async () => {
+                                onPress: () => {
                                     if (deleteTargetRef.current) {
-                                        await LS.habits.createHabit(
-                                            deleteTargetRef.current
-                                        ),
-                                            await reloadHabitsFromStorage();
+                                        addHabit(deleteTargetRef.current);
                                     }
                                 },
                             }}

@@ -21,7 +21,6 @@ import HeaderBackButton from './components/HeaderBackButton';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import NewHabitScreen from './pages/Habits/NewHabit';
 import { Provider as ReduxProvider } from 'react-redux';
-import { store } from './store';
 
 const Drawer = createDrawerNavigator();
 
@@ -29,13 +28,11 @@ export default function App() {
     return (
         <GestureHandlerRootView>
             <NavigationContainer>
-                <ReduxProvider store={store}>
-                    <AppContextProvider>
-                        <PaperProvider theme={AppTheme}>
-                            <Root />
-                        </PaperProvider>
-                    </AppContextProvider>
-                </ReduxProvider>
+                <AppContextProvider>
+                    <PaperProvider theme={AppTheme}>
+                        <Root />
+                    </PaperProvider>
+                </AppContextProvider>
             </NavigationContainer>
         </GestureHandlerRootView>
     );

@@ -8,13 +8,9 @@ const baseCol = `rgb(75, 75, 75)`;
 
 type HabitCalendarProps = {
     habit: Habit;
-    completionCountToday: number;
 };
 
-export default function HabitCalendar({
-    habit,
-    completionCountToday,
-}: HabitCalendarProps) {
+export default function HabitCalendar({ habit }: HabitCalendarProps) {
     const matrix = habit.completionMatrix;
     const hexCol = COLORS[habit.color];
 
@@ -24,12 +20,8 @@ export default function HabitCalendar({
                 () => (
                     <View style={S.container}>
                         {habitDays.map((dateStr, idx) => {
-                            const today: boolean = dateStr === DateNowStr;
-
                             const percent =
-                                (today
-                                    ? completionCountToday
-                                    : matrix[dateStr] ?? 0) / habit.dailyGoal;
+                                (matrix[dateStr] ?? 0) / habit.dailyGoal;
 
                             const col =
                                 percent == 0
@@ -53,7 +45,7 @@ export default function HabitCalendar({
                         })}
                     </View>
                 ),
-                [habitDays, matrix, completionCountToday]
+                [habitDays, Object.values(matrix)]
             )}
         </>
     );

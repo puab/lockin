@@ -1,21 +1,20 @@
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { useAppContext } from '../../../contexts/AppContext';
+import { StyleSheet, View } from 'react-native';
 import AppTheme from '../../../Theme';
 import { Icon, Text } from 'react-native-paper';
-import { Task } from '../../Tasks/Types';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { DateNow, pluralize } from '../../../Util';
+import { DateNowStr, pluralize } from '../../../Util';
 import { DateTime } from 'luxon';
 import Block from './Block';
+import { useAppStore } from '../../../store';
 
 export default function TaskBlock() {
-    const tasksToday = useAppContext<Task[]>(s => s.tasks).filter(
-        t => t.date === DateNow.toFormat('yyyy-LL-dd')
+    const tasksToday = useAppStore(s => s.tasks).filter(
+        t => t.date === DateNowStr
     );
     const nav = useNavigation<NativeStackNavigationProp<any>>();
 
-    async function goToTasks() {
+    function goToTasks() {
         nav.navigate('Tasklist', { currentDateMs: DateTime.now().toMillis() });
     }
 
