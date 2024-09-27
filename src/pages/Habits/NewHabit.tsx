@@ -12,8 +12,6 @@ import IconSelector from './components/IconSelector';
 import { Habit } from './Types';
 import { uuid } from '../../Util';
 import { DateTime } from 'luxon';
-import LS from '../../LocalStorage';
-import { useAppContext } from '../../contexts/AppContext';
 import { useAppStore } from '../../store';
 import { useShallow } from 'zustand/react/shallow';
 
@@ -21,7 +19,6 @@ export default function NewHabitScreen({ navigation }) {
     const addHabit = useAppStore(useShallow(s => s.addHabit));
 
     const { errors, validate } = useErrorStack();
-    const [busy, setBusy] = useState<boolean>(false);
 
     const [name, setName] = useState<string>('');
     const [description, setDescription] = useState<string>('');
@@ -71,9 +68,7 @@ export default function NewHabitScreen({ navigation }) {
         });
     }, [color]);
 
-    async function handleCreate() {
-        setBusy(true);
-
+    function handleCreate() {
         const habit: Habit = {
             id: uuid(),
             name,
@@ -93,8 +88,6 @@ export default function NewHabitScreen({ navigation }) {
             navigation.navigate('Habits');
             reset();
         }
-
-        setBusy(false);
     }
 
     return (
@@ -129,7 +122,6 @@ export default function NewHabitScreen({ navigation }) {
             <Button
                 mode='contained'
                 style={{ backgroundColor: COLORS[color] }}
-                loading={busy}
                 onPress={handleCreate}
                 icon={icon}
             >

@@ -5,10 +5,6 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/core';
 
 import { createContext, useContextSelector } from 'use-context-selector';
-import LS from '../LocalStorage';
-import { Task } from '../pages/Tasks/Types';
-import { Habit } from '../pages/Habits/Types';
-import { delay } from '../Util';
 import LoaderPlaceholder from '../components/LoaderPlaceholder';
 import PageLayout from '../components/PageLayout';
 import { useAppStore } from '../store';

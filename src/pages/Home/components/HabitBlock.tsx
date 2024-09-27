@@ -6,8 +6,7 @@ import { CircularProgressBase } from 'react-native-circular-progress-indicator';
 import { Habit } from '../../Habits/Types';
 import { DateNowStr } from '../../../Util';
 import { Icon, Text } from 'react-native-paper';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import LS from '../../../LocalStorage';
+import { useCallback, useMemo } from 'react';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 import { useAppStore } from '../../../store';
@@ -90,30 +89,26 @@ function HabitButton({ habit, wantsCompletion }: HabitButtonProps) {
         wantsCompletion();
     }
 
-    return useMemo(() => {
-        console.log(habit.name);
-
-        return (
-            <TouchableOpacity onPress={handlePress}>
-                <CircularProgressBase
-                    value={(countToday / habit.dailyGoal) * 100}
-                    maxValue={100}
-                    radius={20}
-                    activeStrokeWidth={5}
-                    inActiveStrokeWidth={5}
-                    duration={150}
-                    activeStrokeColor={COLORS[habit.color]}
-                >
-                    <Icon
-                        size={18}
-                        source={habit.icon}
-                        color={COLORS[habit.color]}
-                    />
-                </CircularProgressBase>
-                {/* <Text>{countToday?.toString()}</Text> */}
-            </TouchableOpacity>
-        );
-    }, [countToday]);
+    return (
+        <TouchableOpacity onPress={handlePress}>
+            <CircularProgressBase
+                value={(countToday / habit.dailyGoal) * 100}
+                maxValue={100}
+                radius={20}
+                activeStrokeWidth={5}
+                inActiveStrokeWidth={5}
+                duration={150}
+                activeStrokeColor={COLORS[habit.color]}
+            >
+                <Icon
+                    size={18}
+                    source={habit.icon}
+                    color={COLORS[habit.color]}
+                />
+            </CircularProgressBase>
+            {/* <Text>{countToday?.toString()}</Text> */}
+        </TouchableOpacity>
+    );
 }
 
 const S = StyleSheet.create({

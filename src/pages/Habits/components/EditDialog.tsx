@@ -6,8 +6,6 @@ import ColorSelector from '../../../components/ColorSelector';
 import { StyleSheet, View } from 'react-native';
 import { COLORS, ICONS } from '../../../Theme';
 import { DateTime } from 'luxon';
-import LS from '../../../LocalStorage';
-import { useAppContext } from '../../../contexts/AppContext';
 import { Habit } from '../Types';
 import IconSelector from './IconSelector';
 import { useAppStore } from '../../../store';

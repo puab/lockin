@@ -16,7 +16,6 @@ import { useShallow } from 'zustand/react/shallow';
 
 export default function NewTaskScreen({ route, navigation }) {
     const addTask = useAppStore(useShallow(s => s.addTask));
-    const [busy, setBusy] = useState<boolean>(false);
     const { errors, validate } = useErrorStack();
 
     const currentDateMs = route?.params?.currentDateMs;
@@ -62,9 +61,7 @@ export default function NewTaskScreen({ route, navigation }) {
         });
     }, [color]);
 
-    async function handleCreate() {
-        setBusy(true);
-
+    function handleCreate() {
         const task: Task = {
             id: uuid(),
             color,
@@ -92,8 +89,6 @@ export default function NewTaskScreen({ route, navigation }) {
             navigation.navigate('Tasklist');
             reset();
         }
-
-        setBusy(false);
     }
 
     return (
@@ -160,7 +155,6 @@ export default function NewTaskScreen({ route, navigation }) {
             <Button
                 mode='contained'
                 style={{ backgroundColor: COLORS[color] }}
-                loading={busy}
                 onPress={handleCreate}
             >
                 Create
