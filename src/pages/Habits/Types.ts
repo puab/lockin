@@ -6,8 +6,8 @@ export type Habit = {
     color: string;
     dailyGoal: number;
     completionMatrix: CompletionMatrix;
-    createdAt: number;
-    updatedAt: number;
+    createdAt?: number;
+    updatedAt?: number;
 };
 
 export type CompletionMatrix = {

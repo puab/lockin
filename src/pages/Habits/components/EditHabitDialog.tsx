@@ -11,13 +11,17 @@ import IconSelector from './IconSelector';
 import { useAppStore } from '../../../store';
 import { useShallow } from 'zustand/react/shallow';
 
-type EditDialogProps = {
+type EditHabitDialogProps = {
     open: boolean;
     setOpen: (open: boolean) => void;
     habit: Habit | null;
 };
 
-export default function EditDialog({ open, setOpen, habit }: EditDialogProps) {
+export default function EditHabitDialog({
+    open,
+    setOpen,
+    habit,
+}: EditHabitDialogProps) {
     const updateHabit = useAppStore(useShallow(s => s.updateHabit));
 
     const [busy, setBusy] = useState<boolean>(false);

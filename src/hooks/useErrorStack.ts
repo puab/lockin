@@ -27,5 +27,5 @@ export default function useErrorStack() {
         return cond;
     }
 
-    return { errors, validate };
+    return { errors, validate, clear: () => setErrors({}) };
 }

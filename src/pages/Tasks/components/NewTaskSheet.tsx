@@ -1,65 +1,45 @@
+import { KeyboardAvoidingView, StyleSheet, View } from 'react-native';
+import BottomSheet from '../../../components/BottomSheet';
 import { Button, Divider, HelperText, Text } from 'react-native-paper';
-import PageLayout from '../../components/PageLayout';
+import AppTheme, { COLORS } from '../../../Theme';
 import { useEffect, useMemo, useState } from 'react';
-import HeaderBackButton from '../../components/HeaderBackButton';
-import FormTextField from '../../components/FormTextField';
+import useErrorStack from '../../../hooks/useErrorStack';
 import { DatePickerInput } from 'react-native-paper-dates';
-import { View } from 'react-native';
 import { DateTime } from 'luxon';
-import ColorSelector from '../../components/ColorSelector';
-import AppTheme, { COLORS } from '../../Theme';
-import { Task } from './Types';
-import { isValidDateString, uuid } from '../../Util';
-import useErrorStack from '../../hooks/useErrorStack';
-import { useAppStore } from '../../store';
+import FormTextField from '../../../components/FormTextField';
+import ColorSelector from '../../../components/ColorSelector';
+import { useAppStore } from '../../../store';
 import { useShallow } from 'zustand/react/shallow';
+import { Task } from '../Types';
+import { isValidDateString, uuid } from '../../../Util';
+import HeaderText from '../../../components/HeaderText';
 
-export default function NewTaskScreen({ route, navigation }) {
+type NewTaskSheetProps = {
+    open: boolean;
+    setOpen: (open: boolean) => void;
+    activeDate?: DateTime;
+};
+
+export default function NewTaskSheet({
+    open,
+    setOpen,
+    activeDate,
+}: NewTaskSheetProps) {
     const addTask = useAppStore(useShallow(s => s.addTask));
-    const { errors, validate } = useErrorStack();
+    const { errors, validate, clear } = useErrorStack();
 
-    const currentDateMs = route?.params?.currentDateMs;
-
-    const [date, setDate] = useState<Date | undefined>(
-        currentDateMs
-            ? DateTime.fromMillis(route.params.currentDateMs).toJSDate()
-            : undefined
-    );
-
-    useMemo(() => {
-        if (currentDateMs) {
-            setDate(DateTime.fromMillis(route.params.currentDateMs).toJSDate());
-        }
-    }, [currentDateMs]);
-
+    const [date, setDate] = useState<Date | undefined>(new Date());
     const [description, setDescription] = useState<string>('');
     const [color, setColor] = useState<string>('white');
 
     function reset() {
+        setDate(undefined);
         setDescription('');
         setColor('white');
+        clear();
     }
 
-    useEffect(() => {
-        navigation?.setOptions({
-            headerLeft: () => (
-                <HeaderBackButton
-                    onPress={() => {
-                        navigation.navigate('Tasklist');
-                        reset();
-                    }}
-                />
-            ),
-        });
-    }, []);
-
-    useEffect(() => {
-        navigation?.setOptions({
-            headerStyle: {
-                backgroundColor: COLORS[color],
-            },
-        });
-    }, [color]);
+    useEffect(() => setDate(activeDate?.toJSDate()), [activeDate]);
 
     function handleCreate() {
         const task: Task = {
@@ -68,8 +48,6 @@ export default function NewTaskScreen({ route, navigation }) {
             description,
             date: DateTime.fromJSDate(date as Date).toFormat('yyyy-LL-dd'),
             completed: false,
-            createdAt: DateTime.now().toMillis(),
-            updatedAt: DateTime.now().toMillis(),
         };
 
         const v1 = validate(
@@ -86,13 +64,19 @@ export default function NewTaskScreen({ route, navigation }) {
 
         if (v1 && v2) {
             addTask(task);
-            navigation.navigate('Tasklist');
-            reset();
+            setOpen(false);
         }
     }
 
     return (
-        <PageLayout style={{ padding: 10, gap: 10 }}>
+        <BottomSheet
+            open={open}
+            setOpen={setOpen}
+            handleColor={COLORS[color]}
+            onDismiss={reset}
+        >
+            <HeaderText style={{ color: COLORS[color] }}>New task</HeaderText>
+
             <View style={{ marginVertical: 30 }}>
                 <DatePickerInput
                     locale='en-GB'
@@ -159,6 +143,18 @@ export default function NewTaskScreen({ route, navigation }) {
             >
                 Create
             </Button>
-        </PageLayout>
+        </BottomSheet>
     );
 }
+
+const S = StyleSheet.create({
+    container: {
+        flex: 1,
+        paddingHorizontal: 15,
+        paddingBottom: 10,
+        gap: 10,
+    },
+    header: {
+        flexDirection: 'row',
+    },
+});

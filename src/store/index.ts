@@ -11,6 +11,7 @@ type AppStore = {
     _setHasHydrated: (val: boolean) => void;
 
     tasks: Task[];
+    clearOldTasks: () => void;
     addTask: (task: Task) => void;
     deleteTask: (task: Task) => void;
     toggleTaskCompletion: (task: Task) => void;
@@ -23,6 +24,7 @@ type AppStore = {
     updateHabit: (habit: Habit) => void;
     addCompletionToHabit: (habit: Habit, dayStr?: string) => void;
     populateFakeCompletion: (habit: Habit, days: number) => void;
+    overwriteHabits: (newHabits: Habit[]) => void;
 };
 
 export const useAppStore = create<AppStore>()(
@@ -36,8 +38,36 @@ export const useAppStore = create<AppStore>()(
             // === TASKS === \\
 
             tasks: [],
+            clearOldTasks: () => {
+                set(state => ({
+                    tasks: state.tasks.filter(t => {
+                        const ageDays = DateTime.now()
+                            .set({
+                                hour: 0,
+                                minute: 0,
+                                second: 0,
+                                millisecond: 0,
+                            })
+                            .diff(
+                                DateTime.fromFormat(t.date, 'yyyy-LL-dd'),
+                                'days'
+                            ).days;
+
+                        return ageDays <= 1;
+                    }),
+                }));
+            },
             addTask: newTask => {
-                set(state => ({ tasks: [newTask, ...state.tasks] }));
+                set(state => ({
+                    tasks: [
+                        {
+                            ...newTask,
+                            createdAt: DateTime.now().toMillis(),
+                            updatedAt: DateTime.now().toMillis(),
+                        },
+                        ...state.tasks,
+                    ],
+                }));
             },
             deleteTask: task => {
                 set(state => ({
@@ -47,7 +77,12 @@ export const useAppStore = create<AppStore>()(
             updateTask: task => {
                 set(state => ({
                     tasks: state.tasks.map(t => {
-                        if (t.id === task.id) return { ...t, ...task };
+                        if (t.id === task.id)
+                            return {
+                                ...t,
+                                ...task,
+                                updatedAt: DateTime.now().toMillis(),
+                            };
 
                         return t;
                     }),
@@ -72,7 +107,16 @@ export const useAppStore = create<AppStore>()(
 
             habits: [],
             addHabit: newHabit => {
-                set(state => ({ habits: [newHabit, ...state.habits] }));
+                set(state => ({
+                    habits: [
+                        {
+                            ...newHabit,
+                            createdAt: DateTime.now().toMillis(),
+                            updatedAt: DateTime.now().toMillis(),
+                        },
+                        ...state.habits,
+                    ],
+                }));
             },
             deleteHabit: habit => {
                 set(state => ({
@@ -82,7 +126,12 @@ export const useAppStore = create<AppStore>()(
             updateHabit: habit => {
                 set(state => ({
                     habits: state.habits.map(h => {
-                        if (h.id === habit.id) return { ...h, ...habit };
+                        if (h.id === habit.id)
+                            return {
+                                ...h,
+                                ...habit,
+                                updatedAt: DateTime.now().toMillis(),
+                            };
 
                         return h;
                     }),
@@ -96,20 +145,17 @@ export const useAppStore = create<AppStore>()(
                 const curHabits = get().habits;
                 const newHabits = curHabits.map(h => {
                     if (h.id === habit.id) {
-                        const { completionMatrix } = h;
-
-                        if (!completionMatrix[dayStr]) {
-                            completionMatrix[dayStr] = 1;
-                        } else {
-                            if (completionMatrix[dayStr] < h.dailyGoal) {
-                                completionMatrix[dayStr]++;
-                            }
-                        }
+                        const matrix = {
+                            ...h.completionMatrix,
+                            [dayStr]: Math.min(
+                                (h.completionMatrix[dayStr] || 0) + 1,
+                                h.dailyGoal
+                            ),
+                        };
 
                         return {
                             ...h,
-                            completionMatrix,
-                            updatedAt: DateTime.now().toMillis(),
+                            completionMatrix: matrix,
                         };
                     }
 
@@ -134,12 +180,15 @@ export const useAppStore = create<AppStore>()(
                 const curHabits = get().habits;
                 const newHabits = curHabits.map(h => {
                     if (h.id === habit.id) {
-                        h.completionMatrix = matrix;
+                        return { ...h, completionMatrix: matrix };
                     }
 
                     return h;
                 });
 
+                set(() => ({ habits: newHabits }));
+            },
+            overwriteHabits: newHabits => {
                 set(() => ({ habits: newHabits }));
             },
         }),
@@ -151,7 +200,10 @@ export const useAppStore = create<AppStore>()(
                 habits: state.habits,
             }),
             onRehydrateStorage: state => {
-                return () => state._setHasHydrated(true);
+                return () => {
+                    state.clearOldTasks();
+                    state._setHasHydrated(true);
+                };
             },
         }
     )

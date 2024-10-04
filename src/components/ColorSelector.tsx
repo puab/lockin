@@ -2,6 +2,7 @@ import { Keyboard, StyleSheet, View, ViewStyle } from 'react-native';
 import { COLORS } from '../Theme';
 import { Text } from 'react-native-paper';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { useMemo } from 'react';
 
 type ColorSelectorProps = {
     value: string;
@@ -14,26 +15,31 @@ export default function ColorSelector({
     onChange,
     style,
 }: ColorSelectorProps) {
-    return (
-        <View style={[S.container, style]}>
-            {Object.entries(COLORS).map(([val, hex], idx) => {
-                const selected = val === value;
+    return useMemo(
+        () => (
+            <View style={[S.container, style]}>
+                {Object.entries(COLORS).map(([val, hex], idx) => {
+                    const selected = val === value;
 
-                return (
-                    <TouchableOpacity
-                        onPress={() => {
-                            Keyboard.dismiss();
-                            onChange(val);
-                        }}
-                        key={`cc${idx}`}
-                    >
-                        <View style={[S.cell, { backgroundColor: hex }]}>
-                            {selected && <View style={S.selectedTick}></View>}
-                        </View>
-                    </TouchableOpacity>
-                );
-            })}
-        </View>
+                    return (
+                        <TouchableOpacity
+                            onPress={() => {
+                                Keyboard.dismiss();
+                                onChange(val);
+                            }}
+                            key={`cc${idx}`}
+                        >
+                            <View style={[S.cell, { backgroundColor: hex }]}>
+                                {selected && (
+                                    <View style={S.selectedTick}></View>
+                                )}
+                            </View>
+                        </TouchableOpacity>
+                    );
+                })}
+            </View>
+        ),
+        [value]
     );
 }
 

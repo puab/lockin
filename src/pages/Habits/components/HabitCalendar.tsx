@@ -2,7 +2,8 @@ import { StyleSheet, View } from 'react-native';
 import { Habit } from '../Types';
 import { COLORS } from '../../../Theme';
 import { useMemo } from 'react';
-import { DateNowStr, habitDays } from '../../../Util';
+import { habitDays } from '../../../Util';
+import { ScrollView } from 'react-native-gesture-handler';
 
 const baseCol = `rgb(75, 75, 75)`;
 
@@ -14,45 +15,43 @@ export default function HabitCalendar({ habit }: HabitCalendarProps) {
     const matrix = habit.completionMatrix;
     const hexCol = COLORS[habit.color];
 
-    return (
-        <>
-            {useMemo(
-                () => (
-                    <View style={S.container}>
-                        {habitDays.map((dateStr, idx) => {
-                            const percent =
-                                (matrix[dateStr] ?? 0) / habit.dailyGoal;
+    return useMemo(
+        () => (
+            <ScrollView horizontal>
+                <View style={S.container}>
+                    {habitDays.map((dateStr, idx) => {
+                        const percent =
+                            (matrix[dateStr] ?? 0) / habit.dailyGoal;
 
-                            const col =
-                                percent == 0
-                                    ? baseCol
-                                    : hexCol +
-                                      Math.floor(255 * percent).toString(16);
+                        const col =
+                            percent == 0
+                                ? baseCol
+                                : hexCol +
+                                  Math.floor(255 * percent).toString(16);
 
-                            return (
-                                <View
-                                    key={`hci${idx}`}
-                                    style={[
-                                        S.cell,
-                                        {
-                                            backgroundColor: col,
-                                        },
-                                    ]}
-                                >
-                                    {/* <Text>{col}</Text> */}
-                                </View>
-                            );
-                        })}
-                    </View>
-                ),
-                [habitDays, Object.values(matrix)]
-            )}
-        </>
+                        return (
+                            <View
+                                key={`hci${idx}`}
+                                style={[
+                                    S.cell,
+                                    {
+                                        backgroundColor: col,
+                                    },
+                                ]}
+                            >
+                                {/* <Text>{col}</Text> */}
+                            </View>
+                        );
+                    })}
+                </View>
+            </ScrollView>
+        ),
+        [habitDays, Object.values(matrix)]
     );
 }
 
 const gap = 3;
-const cellSize = 10;
+const cellSize = 15;
 
 const S = StyleSheet.create({
     container: {
@@ -64,7 +63,6 @@ const S = StyleSheet.create({
     cell: {
         height: cellSize,
         aspectRatio: '1 / 1',
-        backgroundColor: 'black',
-        borderRadius: 2,
+        borderRadius: 3,
     },
 });

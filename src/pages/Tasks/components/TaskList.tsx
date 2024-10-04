@@ -7,21 +7,24 @@ import DraggableFlatList, {
     ScaleDecorator,
 } from 'react-native-draggable-flatlist';
 import { useAppStore } from '../../../store';
-
 import { useShallow } from 'zustand/react/shallow';
+import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
+import * as Haptics from 'expo-haptics';
+import NonIdealState from '../../../components/NonIdealState';
 
 type TaskListProps = {
+    tasks: Task[];
     active: DateTime;
     wantsEdit: (task: Task) => void;
     wantsDelete: (task: Task) => void;
 };
 
 export default function TaskList({
+    tasks,
     active,
     wantsEdit,
     wantsDelete,
 }: TaskListProps) {
-    const tasks = useAppStore(s => s.tasks);
     const overwriteTasks = useAppStore(useShallow(s => s.overwriteTasks));
 
     const activeDateStr = active.toFormat('yyyy-LL-dd');
@@ -31,13 +34,18 @@ export default function TaskList({
     const renderItem = ({ item, drag }) => {
         return (
             <ScaleDecorator>
-                <TouchableOpacity onLongPress={drag}>
+                <TouchableWithoutFeedback
+                    onLongPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+                        drag();
+                    }}
+                >
                     <TaskEntry
                         task={item}
                         wantsEdit={() => wantsEdit(item)}
                         wantsDelete={() => wantsDelete(item)}
                     />
-                </TouchableOpacity>
+                </TouchableWithoutFeedback>
             </ScaleDecorator>
         );
     };
@@ -45,9 +53,11 @@ export default function TaskList({
     return (
         <View style={list.container}>
             {displayTasks?.length === 0 ? (
-                <Text style={{ marginHorizontal: 'auto' }}>
-                    No tasks this day
-                </Text>
+                <NonIdealState
+                    icon='calendar-question'
+                    title={`No tasks today`}
+                    message='Add a new task by clicking the + button below'
+                />
             ) : (
                 <DraggableFlatList
                     data={displayTasks}

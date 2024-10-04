@@ -13,13 +13,17 @@ import { useAppContext } from '../../../contexts/AppContext';
 import { useAppStore } from '../../../store';
 import { useShallow } from 'zustand/react/shallow';
 
-type EditDialogProps = {
+type EditTaskDialogProps = {
     open: boolean;
     setOpen: (open: boolean) => void;
     task: Task | null;
 };
 
-export default function EditDialog({ open, setOpen, task }: EditDialogProps) {
+export default function EditTaskDialog({
+    open,
+    setOpen,
+    task,
+}: EditTaskDialogProps) {
     const tasks = useAppStore(s => s.tasks);
     const updateTask = useAppStore(useShallow(s => s.updateTask));
 

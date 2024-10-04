@@ -1,21 +1,26 @@
-import { Button, Divider, Icon, Text } from 'react-native-paper';
-import PageLayout from '../../components/PageLayout';
-import { useEffect, useState } from 'react';
-import HeaderBackButton from '../../components/HeaderBackButton';
-import AppTheme, { COLORS, ICONS } from '../../Theme';
-import ColorSelector from '../../components/ColorSelector';
-import useErrorStack from '../../hooks/useErrorStack';
-import FormTextField from '../../components/FormTextField';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import DailyGoalControl from './components/DailyGoalControl';
-import IconSelector from './components/IconSelector';
-import { Habit } from './Types';
-import { uuid } from '../../Util';
 import { DateTime } from 'luxon';
-import { useAppStore } from '../../store';
+import BottomSheet from '../../../components/BottomSheet';
+import { KeyboardAvoidingView, StyleSheet, View } from 'react-native';
+import { Button, Divider, Text } from 'react-native-paper';
+import { COLORS, ICONS } from '../../../Theme';
+import { useAppStore } from '../../../store';
 import { useShallow } from 'zustand/react/shallow';
+import useErrorStack from '../../../hooks/useErrorStack';
+import { useMemo, useState } from 'react';
+import IconSelector from './IconSelector';
+import FormTextField from '../../../components/FormTextField';
+import DailyGoalControl from './DailyGoalControl';
+import ColorSelector from '../../../components/ColorSelector';
+import { Habit } from '../Types';
+import { uuid } from '../../../Util';
+import HeaderText from '../../../components/HeaderText';
 
-export default function NewHabitScreen({ navigation }) {
+type NewHabitSheetProps = {
+    open: boolean;
+    setOpen: (open: boolean) => void;
+};
+
+export default function NewHabitSheet({ open, setOpen }: NewHabitSheetProps) {
     const addHabit = useAppStore(useShallow(s => s.addHabit));
 
     const { errors, validate } = useErrorStack();
@@ -34,40 +39,6 @@ export default function NewHabitScreen({ navigation }) {
         setColor('white');
     }
 
-    useEffect(() => {
-        navigation?.setOptions({
-            headerLeft: () => (
-                <HeaderBackButton
-                    onPress={() => {
-                        navigation.navigate('Habits');
-                        reset();
-                    }}
-                />
-            ),
-        });
-    }, []);
-
-    useEffect(() => {
-        navigation?.setOptions({
-            headerRight: () => (
-                <View style={{ marginRight: 15 }}>
-                    <IconSelector
-                        value={icon}
-                        onChange={setIcon}
-                    />
-                </View>
-            ),
-        });
-    }, [icon]);
-
-    useEffect(() => {
-        navigation?.setOptions({
-            headerStyle: {
-                backgroundColor: COLORS[color],
-            },
-        });
-    }, [color]);
-
     function handleCreate() {
         const habit: Habit = {
             id: uuid(),
@@ -77,21 +48,40 @@ export default function NewHabitScreen({ navigation }) {
             color,
             dailyGoal,
             completionMatrix: {},
-            createdAt: DateTime.now().toMillis(),
-            updatedAt: DateTime.now().toMillis(),
         };
 
         const v1 = validate('name', name.length > 0, 'Name is required');
 
         if (v1) {
             addHabit(habit);
-            navigation.navigate('Habits');
-            reset();
+            setOpen(false);
         }
     }
 
     return (
-        <PageLayout style={{ padding: 10, gap: 10 }}>
+        <BottomSheet
+            open={open}
+            setOpen={setOpen}
+            handleColor={COLORS[color]}
+            onDismiss={reset}
+        >
+            {useMemo(
+                () => (
+                    <View style={S.header}>
+                        <HeaderText style={{ color: COLORS[color] }}>
+                            New task
+                        </HeaderText>
+
+                        <IconSelector
+                            value={icon}
+                            onChange={setIcon}
+                            iconColor={COLORS[color]}
+                        />
+                    </View>
+                ),
+                [color, icon]
+            )}
+
             <FormTextField
                 label='Name'
                 value={name}
@@ -127,6 +117,19 @@ export default function NewHabitScreen({ navigation }) {
             >
                 Create
             </Button>
-        </PageLayout>
+        </BottomSheet>
     );
 }
+
+const S = StyleSheet.create({
+    container: {
+        flex: 1,
+        paddingHorizontal: 15,
+        paddingBottom: 10,
+        gap: 10,
+    },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+});

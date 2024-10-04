@@ -30,7 +30,6 @@ export default function HabitItem({
 
     const [expandedDesc, setExpandedDesc] = useState<boolean>(false);
     const [menuOpen, setMenuOpen] = useState<boolean>(false);
-    const [busy, setBusy] = useState<boolean>(false);
 
     const headerLeft = (
         <View style={S.headerLeft}>
@@ -62,42 +61,34 @@ export default function HabitItem({
 
     const countToday = habit.completionMatrix[DateNowStr] ?? 0;
 
-    const longPress = Gesture.LongPress()
+    const tap = Gesture.Tap()
         .runOnJS(true)
+        .numberOfTaps(2)
         .onStart(() => setMenuOpen(true));
 
     const el = (
-        <GestureDetector gesture={longPress}>
-            <View style={[S.container, { borderColor: habitHex }]}>
-                <View style={S.header}>
-                    {headerLeft}
+        <View style={[S.container, { borderColor: habitHex }]}>
+            <View style={S.header}>
+                <GestureDetector gesture={tap}>{headerLeft}</GestureDetector>
 
-                    <TouchableOpacity onPress={wantsCompletion}>
-                        <View style={S.completionCorner}>
-                            <Text>
-                                {countToday} / {habit.dailyGoal}
-                            </Text>
-                            <Icon
-                                source={
-                                    countToday == habit.dailyGoal
-                                        ? 'check'
-                                        : 'plus'
-                                }
-                                color='white'
-                                size={24}
-                            />
-                        </View>
-                    </TouchableOpacity>
-                </View>
-
-                <ScrollView
-                    horizontal
-                    style={{ paddingBottom: 5 }}
-                >
-                    <HabitCalendar habit={habit} />
-                </ScrollView>
+                <TouchableOpacity onPress={wantsCompletion}>
+                    <View style={S.completionCorner}>
+                        <Text>
+                            {countToday} / {habit.dailyGoal}
+                        </Text>
+                        <Icon
+                            source={
+                                countToday == habit.dailyGoal ? 'check' : 'plus'
+                            }
+                            color='white'
+                            size={24}
+                        />
+                    </View>
+                </TouchableOpacity>
             </View>
-        </GestureDetector>
+
+            <HabitCalendar habit={habit} />
+        </View>
     );
 
     return (
@@ -146,6 +137,8 @@ const S = StyleSheet.create({
         borderLeftWidth: 3,
         backgroundColor: AppTheme.colors.inverseOnSurface,
         borderRadius: 5,
+        marginBottom: 10,
+        marginHorizontal: 10,
     },
     header: {
         flexDirection: 'row',
@@ -155,6 +148,7 @@ const S = StyleSheet.create({
     headerLeft: {
         flexDirection: 'row',
         flexShrink: 1,
+        flexGrow: 1,
     },
     completionCorner: {
         flexDirection: 'row',

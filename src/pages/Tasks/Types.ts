@@ -4,6 +4,6 @@ export type Task = {
     description: string;
     completed: boolean;
     color: string;
-    createdAt: number;
-    updatedAt: number;
+    createdAt?: number;
+    updatedAt?: number;
 };

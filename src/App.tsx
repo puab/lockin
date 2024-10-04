@@ -10,7 +10,6 @@ import JournalScreen from './pages/Journal';
 import AuthScreen from './pages/Auth';
 import SettingsScreen from './pages/Settings';
 import TasksScreen from './pages/Tasks';
-import NewTaskScreen from './pages/Tasks/NewTask';
 import HabitScreen from './pages/Habits';
 
 import '../gesture-handler';
@@ -19,8 +18,8 @@ registerTranslation('en-GB', enGB);
 
 import HeaderBackButton from './components/HeaderBackButton';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import NewHabitScreen from './pages/Habits/NewHabit';
-import { Provider as ReduxProvider } from 'react-redux';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import GoalsScreen from './pages/Goals';
 
 const Drawer = createDrawerNavigator();
 
@@ -30,7 +29,9 @@ export default function App() {
             <NavigationContainer>
                 <AppContextProvider>
                     <PaperProvider theme={AppTheme}>
-                        <Root />
+                        <BottomSheetModalProvider>
+                            <Root />
+                        </BottomSheetModalProvider>
                     </PaperProvider>
                 </AppContextProvider>
             </NavigationContainer>
@@ -87,15 +88,6 @@ function Root() {
             />
 
             <Drawer.Screen
-                name='New task'
-                component={NewTaskScreen}
-                options={{
-                    headerLeft: () => <HeaderBackButton />,
-                    drawerItemStyle: { display: 'none' },
-                }}
-            />
-
-            <Drawer.Screen
                 name='Habits'
                 component={HabitScreen}
                 options={{
@@ -110,11 +102,16 @@ function Root() {
             />
 
             <Drawer.Screen
-                name='New habit'
-                component={NewHabitScreen}
+                name='Goals'
+                component={GoalsScreen}
                 options={{
-                    headerLeft: () => <HeaderBackButton />,
-                    drawerItemStyle: { display: 'none' },
+                    drawerIcon: ({ color, size, focused }) => (
+                        <Icon
+                            source={'flag-checkered'}
+                            color={color}
+                            size={size}
+                        />
+                    ),
                 }}
             />
 

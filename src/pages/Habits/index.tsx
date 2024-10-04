@@ -4,12 +4,19 @@ import { Button, Portal, Snackbar, Text } from 'react-native-paper';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import HabitItem from './components/HabitItem';
 import { Habit } from './Types';
-import EditDialog from './components/EditDialog';
+import EditHabitDialog from './components/EditHabitDialog';
 import { useAppStore } from '../../store';
 import { useShallow } from 'zustand/react/shallow';
+import HabitList from './components/HabitList';
+import NewHabitSheet from './components/NewHabitSheet';
+import useSheetBack from '../../hooks/useSheetBack';
 
 export default function HabitScreen({ navigation }) {
     const habits = useAppStore(s => s.habits);
+
+    const [newHabitSheetOpen, setNewHabitSheetOpen] = useState<boolean>(false);
+    useSheetBack(newHabitSheetOpen, setNewHabitSheetOpen);
+
     const addCompletionToHabit = useAppStore(
         useShallow(s => s.addCompletionToHabit)
     );
@@ -20,6 +27,7 @@ export default function HabitScreen({ navigation }) {
     const addHabit = useAppStore(useShallow(s => s.addHabit));
 
     function wantsCompletion(habit: Habit) {
+        console.log('wants', habit.name);
         addCompletionToHabit(habit);
     }
 
@@ -42,52 +50,51 @@ export default function HabitScreen({ navigation }) {
         populateFakeCompletion(habit, 100);
     }
 
+    function wantsCreate() {
+        setJustDeleted(false);
+        setNewHabitSheetOpen(true);
+    }
+
     useEffect(() => {
         navigation?.setOptions({
-            headerRight: () => (
-                <Button
-                    style={{ marginRight: 15 }}
-                    mode='elevated'
-                    icon={'plus'}
-                    onPress={() => {
-                        setJustDeleted(false);
-
-                        navigation?.navigate('New habit');
-                    }}
-                >
-                    Create
-                </Button>
-            ),
+            headerRight: () =>
+                habits.length !== 0 ? (
+                    <Button
+                        style={{ marginRight: 15 }}
+                        mode='elevated'
+                        icon={'plus'}
+                        onPress={wantsCreate}
+                    >
+                        Create
+                    </Button>
+                ) : null,
         });
-    }, []);
+    }, [habits]);
 
     return (
         <PageLayout style={S.page}>
             {useMemo(
                 () => (
-                    <ScrollView>
-                        <View style={S.list}>
-                            {habits.map(habit => (
-                                <HabitItem
-                                    key={`habit${habit.id}`}
-                                    habit={habit}
-                                    wantsCompletion={() =>
-                                        wantsCompletion(habit)
-                                    }
-                                    wantsDelete={() => wantsDelete(habit)}
-                                    wantsEdit={() => wantsEdit(habit)}
-                                    wantsFakeData={() => wantsFakeData(habit)}
-                                />
-                            ))}
-                        </View>
-                    </ScrollView>
+                    <HabitList
+                        habits={habits}
+                        wantsCompletion={wantsCompletion}
+                        wantsDelete={wantsDelete}
+                        wantsEdit={wantsEdit}
+                        wantsFakeData={wantsFakeData}
+                        wantsCreate={wantsCreate}
+                    />
                 ),
-                [JSON.stringify(habits)]
+                [habits]
             )}
+
+            <NewHabitSheet
+                open={newHabitSheetOpen}
+                setOpen={setNewHabitSheetOpen}
+            />
 
             {useMemo(
                 () => (
-                    <EditDialog
+                    <EditHabitDialog
                         open={isEditing}
                         setOpen={setEditing}
                         habit={editTargetRef.current as Habit}
@@ -128,10 +135,5 @@ const S = StyleSheet.create({
     page: {
         padding: 5,
         paddingBottom: 0,
-    },
-    list: {
-        gap: 10,
-        paddingBottom: 50,
-        paddingHorizontal: 10,
     },
 });

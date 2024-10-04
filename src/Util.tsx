@@ -9,7 +9,7 @@ export const DateNowStr = DateNow.toFormat('yyyy-LL-dd');
 export const habitDays = (() => {
     const start = DateTime.now();
 
-    return [...new Array(500)].map((_, idx) => {
+    return [...new Array(52 * 7)].map((_, idx) => {
         return start.minus({ days: idx }).toFormat('yyyy-LL-dd');
     });
 })();

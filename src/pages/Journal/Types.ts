@@ -1,0 +1,3 @@
+type JournalEntry = {
+    id: string;
+};
