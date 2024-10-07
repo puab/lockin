@@ -33,7 +33,6 @@ export default function TaskEntry({
     }
 
     const doubleTap = Gesture.Tap()
-        .numberOfTaps(2)
         .runOnJS(true)
         .onStart(() => setMenuOpen(true));
 

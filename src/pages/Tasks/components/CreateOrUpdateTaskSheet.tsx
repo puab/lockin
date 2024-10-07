@@ -14,18 +14,23 @@ import { Task } from '../Types';
 import { isValidDateString, uuid } from '../../../Util';
 import HeaderText from '../../../components/HeaderText';
 
-type NewTaskSheetProps = {
+type CreateOrUpdateTaskSheetProps = {
     open: boolean;
     setOpen: (open: boolean) => void;
     activeDate?: DateTime;
+    editTarget: Task | null;
 };
 
-export default function NewTaskSheet({
+export default function CreateOrUpdateTaskSheet({
     open,
     setOpen,
     activeDate,
-}: NewTaskSheetProps) {
+    editTarget,
+}: CreateOrUpdateTaskSheetProps) {
+    const isEditing = !!editTarget;
+
     const addTask = useAppStore(useShallow(s => s.addTask));
+    const updateTask = useAppStore(useShallow(s => s.updateTask));
     const { errors, validate, clear } = useErrorStack();
 
     const [date, setDate] = useState<Date | undefined>(new Date());
@@ -33,7 +38,7 @@ export default function NewTaskSheet({
     const [color, setColor] = useState<string>('white');
 
     function reset() {
-        setDate(undefined);
+        setDate(activeDate?.toJSDate() ?? new Date());
         setDescription('');
         setColor('white');
         clear();
@@ -41,9 +46,21 @@ export default function NewTaskSheet({
 
     useEffect(() => setDate(activeDate?.toJSDate()), [activeDate]);
 
-    function handleCreate() {
+    useEffect(() => {
+        if (!open) return;
+
+        if (editTarget) {
+            setDate(
+                DateTime.fromFormat(editTarget.date, 'yyyy-LL-dd').toJSDate()
+            );
+            setDescription(editTarget.description);
+            setColor(editTarget.color);
+        } else reset();
+    }, [open]);
+
+    function handleCreateOrUpdate() {
         const task: Task = {
-            id: uuid(),
+            id: isEditing ? editTarget.id : uuid(),
             color,
             description,
             date: DateTime.fromJSDate(date as Date).toFormat('yyyy-LL-dd'),
@@ -63,7 +80,9 @@ export default function NewTaskSheet({
         );
 
         if (v1 && v2) {
-            addTask(task);
+            if (isEditing) updateTask(task);
+            else addTask(task);
+
             setOpen(false);
         }
     }
@@ -73,9 +92,10 @@ export default function NewTaskSheet({
             open={open}
             setOpen={setOpen}
             handleColor={COLORS[color]}
-            onDismiss={reset}
         >
-            <HeaderText style={{ color: COLORS[color] }}>New task</HeaderText>
+            <HeaderText style={{ color: COLORS[color] }}>
+                {isEditing ? 'Update' : 'New'} task
+            </HeaderText>
 
             <View style={{ marginVertical: 30 }}>
                 <DatePickerInput
@@ -139,22 +159,10 @@ export default function NewTaskSheet({
             <Button
                 mode='contained'
                 style={{ backgroundColor: COLORS[color] }}
-                onPress={handleCreate}
+                onPress={handleCreateOrUpdate}
             >
-                Create
+                {isEditing ? 'Update' : 'Create'}
             </Button>
         </BottomSheet>
     );
 }
-
-const S = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingHorizontal: 15,
-        paddingBottom: 10,
-        gap: 10,
-    },
-    header: {
-        flexDirection: 'row',
-    },
-});

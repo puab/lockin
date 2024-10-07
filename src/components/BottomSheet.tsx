@@ -1,7 +1,7 @@
 import { BottomSheetBackdrop, BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useEffect, useRef } from 'react';
 import AppTheme from '../Theme';
-import { KeyboardAvoidingView, StyleSheet } from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 
 type BottomSheetProps = {
     open: boolean;
@@ -47,8 +47,24 @@ export default function BottomSheet({
             backgroundStyle={{
                 backgroundColor: AppTheme.colors.inverseOnSurface,
             }}
+            backdropComponent={props => (
+                <BottomSheetBackdrop
+                    {...props}
+                    opacity={0.75}
+                    enableTouchThrough={false}
+                    appearsOnIndex={0}
+                    disappearsOnIndex={-1}
+                    style={[
+                        { backgroundColor: 'rgba(0, 0, 0, 1)' },
+                        StyleSheet.absoluteFillObject,
+                    ]}
+                />
+            )}
         >
-            <KeyboardAvoidingView style={S.container}>
+            <KeyboardAvoidingView
+                style={S.container}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            >
                 {children}
             </KeyboardAvoidingView>
         </BottomSheetModal>

@@ -1,34 +1,23 @@
 import { View } from 'react-native';
-import HabitItem from './HabitItem';
-import { useAppStore } from '../../../store';
-import { Habit } from '../Types';
+import { Goal } from '../Types';
+import NonIdealState from '../../../components/NonIdealState';
+import { Button } from 'react-native-paper';
 import DraggableFlatList, {
     ScaleDecorator,
 } from 'react-native-draggable-flatlist';
-import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
+import { useAppStore } from '../../../store';
 import { useShallow } from 'zustand/react/shallow';
-import { Button } from 'react-native-paper';
-import NonIdealState from '../../../components/NonIdealState';
+import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
+
 import * as Haptics from 'expo-haptics';
 
-type HabitListProps = {
-    habits: Habit[];
-    wantsCompletion: (habit: Habit) => void;
-    wantsDelete: (habit: Habit) => void;
-    wantsEdit: (habit: Habit) => void;
-    wantsFakeData: (habit: Habit) => void;
+type GoalListProps = {
+    goals: Goal[];
     wantsCreate: () => void;
 };
 
-export default function HabitList({
-    habits,
-    wantsCompletion,
-    wantsDelete,
-    wantsEdit,
-    wantsFakeData,
-    wantsCreate,
-}: HabitListProps) {
-    const overwriteHabits = useAppStore(useShallow(s => s.overwriteHabits));
+export default function GoalList({ goals, wantsCreate }: GoalListProps) {
+    const overwriteGoals = useAppStore(useShallow(s => s.overwriteGoals));
 
     const renderItem = ({ item, drag }) => (
         <ScaleDecorator>
@@ -38,24 +27,24 @@ export default function HabitList({
                     drag();
                 }}
             >
-                <HabitItem
+                {/* <HabitItem
                     habit={item}
                     wantsCompletion={() => wantsCompletion(item)}
                     wantsDelete={() => wantsDelete(item)}
                     wantsEdit={() => wantsEdit(item)}
                     wantsFakeData={() => wantsFakeData(item)}
-                />
+                /> */}
             </TouchableWithoutFeedback>
         </ScaleDecorator>
     );
 
     return (
         <View style={{ marginTop: 5 }}>
-            {habits?.length === 0 ? (
+            {goals?.length === 0 ? (
                 <NonIdealState
-                    icon='beaker-question'
-                    title='No habits'
-                    message='Create a habit to get started'
+                    icon='crosshairs-question'
+                    title='No goals'
+                    message='Create a goal to get started'
                 >
                     <Button
                         style={{ marginRight: 15 }}
@@ -68,8 +57,8 @@ export default function HabitList({
                 </NonIdealState>
             ) : (
                 <DraggableFlatList
-                    data={habits}
-                    onDragEnd={({ data }) => overwriteHabits(data)}
+                    data={goals}
+                    onDragEnd={({ data }) => overwriteGoals(data)}
                     renderItem={renderItem}
                     keyExtractor={item => `hi${item.id}`}
                 />

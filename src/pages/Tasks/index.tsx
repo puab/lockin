@@ -7,17 +7,16 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Divider, Portal, Snackbar, Text } from 'react-native-paper';
 import TaskList from './components/TaskList';
 import { Task } from './Types';
-import EditTaskDialog from './components/EditTaskDialog';
 import AddItemButton from '../../components/AddItemButton';
 import { useAppStore } from '../../store';
 import { useShallow } from 'zustand/react/shallow';
-import NewTaskSheet from './components/NewTaskSheet';
+import CreateOrUpdateTaskSheet from './components/CreateOrUpdateTaskSheet';
 import { useFocusEffect } from '@react-navigation/native';
 import useSheetBack from '../../hooks/useSheetBack';
 
 export default function TasksScreen({ route, navigation }) {
-    const [newTaskSheetOpen, setNewTaskSheetOpen] = useState<boolean>(false);
-    useSheetBack(newTaskSheetOpen, setNewTaskSheetOpen);
+    const [taskSheetOpen, setTaskSheetOpen] = useState<boolean>(false);
+    useSheetBack(taskSheetOpen, setTaskSheetOpen);
 
     const [deleteTask, addTask] = useAppStore(
         useShallow(s => [s.deleteTask, s.addTask])
@@ -44,11 +43,10 @@ export default function TasksScreen({ route, navigation }) {
         if (currentDateMs) setCurDate(DateTime.fromMillis(currentDateMs));
     }, [currentDateMs]);
 
-    const [isEditing, setEditing] = useState<boolean>(false);
     const editTargetRef = useRef<Task | null>(null);
     function wantsEdit(task: Task) {
         editTargetRef.current = task;
-        setEditing(true);
+        setTaskSheetOpen(true);
     }
 
     const [justDeleted, setJustDeleted] = useState<boolean>(false);
@@ -59,30 +57,28 @@ export default function TasksScreen({ route, navigation }) {
         setJustDeleted(true);
     }
 
+    function wantsCreate() {
+        editTargetRef.current = null;
+        setTaskSheetOpen(true);
+    }
+
+    const currentlyInPast =
+        curDate.startOf('day').toMillis() < DateNow.startOf('day').toMillis();
+
     return (
         <PageLayout style={S.page}>
-            {curDate.startOf('day').toMillis() >=
-                DateNow.startOf('day').toMillis() && (
-                <AddItemButton
-                    onPress={() => {
-                        // setJustDeleted(false);
-                        // navigation?.navigate('New task', {
-                        //     currentDateMs: curDate.toMillis(),
-                        // });
-                        setNewTaskSheetOpen(true);
-                    }}
-                />
-            )}
+            {!currentlyInPast && <AddItemButton onPress={wantsCreate} />}
 
             {useMemo(
                 () => (
-                    <NewTaskSheet
+                    <CreateOrUpdateTaskSheet
                         activeDate={curDate}
-                        open={newTaskSheetOpen}
-                        setOpen={setNewTaskSheetOpen}
+                        open={taskSheetOpen}
+                        setOpen={setTaskSheetOpen}
+                        editTarget={editTargetRef.current}
                     />
                 ),
-                [newTaskSheetOpen]
+                [taskSheetOpen]
             )}
 
             <DateRow
@@ -101,20 +97,10 @@ export default function TasksScreen({ route, navigation }) {
                         active={curDate}
                         wantsEdit={wantsEdit}
                         wantsDelete={wantsDelete}
+                        currentlyInPast={currentlyInPast}
                     />
                 ),
                 [curDate, tasks]
-            )}
-
-            {useMemo(
-                () => (
-                    <EditTaskDialog
-                        open={isEditing}
-                        setOpen={setEditing}
-                        task={editTargetRef.current as Task}
-                    />
-                ),
-                [isEditing]
             )}
 
             {useMemo(

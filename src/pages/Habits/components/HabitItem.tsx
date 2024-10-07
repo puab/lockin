@@ -63,7 +63,6 @@ export default function HabitItem({
 
     const tap = Gesture.Tap()
         .runOnJS(true)
-        .numberOfTaps(2)
         .onStart(() => setMenuOpen(true));
 
     const el = (

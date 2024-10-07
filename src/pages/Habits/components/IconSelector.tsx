@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { StyleSheet, TouchableOpacity } from 'react-native';
 import { Button, Dialog, Icon, Portal, Text } from 'react-native-paper';
-import AppTheme, { ICONS } from '../../../Theme';
+import AppTheme, { ICONS, INPUT_CONTAINER_STYLE } from '../../../Theme';
 
 type IconSelectorProps = {
     value: string;
@@ -18,7 +18,10 @@ export default function IconSelector({
 
     return (
         <>
-            <TouchableOpacity onPress={() => setDialogOpen(true)}>
+            <TouchableOpacity
+                onPress={() => setDialogOpen(true)}
+                style={[{ padding: 3 }, INPUT_CONTAINER_STYLE]}
+            >
                 <Icon
                     source={value}
                     size={24}

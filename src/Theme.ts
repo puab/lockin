@@ -80,4 +80,11 @@ const AppTheme: MD3Theme = {
     },
 };
 
+export const INPUT_CONTAINER_STYLE = {
+    backgroundColor: AppTheme.colors.background,
+    borderRadius: AppTheme.roundness,
+    borderColor: AppTheme.colors.outline,
+    borderWidth: 1,
+};
+
 export default AppTheme;

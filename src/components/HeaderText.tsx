@@ -3,7 +3,7 @@ import { Text } from 'react-native-paper';
 
 type HeaderTextProps = {
     style?: TextStyle;
-    children: string;
+    children: any;
 };
 
 export default function HeaderText({ style, children }: HeaderTextProps) {

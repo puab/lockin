@@ -1,18 +1,24 @@
-type GoalStep = {
+export type GoalStep = {
+    id: string;
     name: string;
     description?: string;
     completed: boolean;
 
-    // 2      - twice a day
+    // false  - never
+    // true   - daily
     // [1, 3] - monday, wednesday
-    repeat?: number | number[];
+    repeat: false | true | number[];
+    showInTaskList?: boolean;
 };
 
-type Goal = {
+export type Goal = {
     id: string;
 
     name: string;
     reason: string;
+
+    color: string;
+    icon: string;
 
     steps: GoalStep[];
     completed: boolean;

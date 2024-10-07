@@ -17,6 +17,7 @@ type TaskListProps = {
     active: DateTime;
     wantsEdit: (task: Task) => void;
     wantsDelete: (task: Task) => void;
+    currentlyInPast: boolean;
 };
 
 export default function TaskList({
@@ -24,14 +25,15 @@ export default function TaskList({
     active,
     wantsEdit,
     wantsDelete,
+    currentlyInPast,
 }: TaskListProps) {
     const overwriteTasks = useAppStore(useShallow(s => s.overwriteTasks));
 
     const activeDateStr = active.toFormat('yyyy-LL-dd');
 
-    const displayTasks = tasks.filter(t => t.date === activeDateStr);
-
     const renderItem = ({ item, drag }) => {
+        if (item.date !== activeDateStr) return null;
+
         return (
             <ScaleDecorator>
                 <TouchableWithoutFeedback
@@ -50,17 +52,23 @@ export default function TaskList({
         );
     };
 
+    const displayTasks = tasks.filter(t => t.date === activeDateStr);
+
     return (
         <View style={list.container}>
             {displayTasks?.length === 0 ? (
                 <NonIdealState
                     icon='calendar-question'
                     title={`No tasks today`}
-                    message='Add a new task by clicking the + button below'
+                    message={
+                        !currentlyInPast
+                            ? `Add a new task by clicking the + button below`
+                            : `You can't add tasks in the past`
+                    }
                 />
             ) : (
                 <DraggableFlatList
-                    data={displayTasks}
+                    data={tasks}
                     onDragEnd={({ data }) => overwriteTasks(data)}
                     renderItem={renderItem}
                     keyExtractor={item => `te${item.id}`}

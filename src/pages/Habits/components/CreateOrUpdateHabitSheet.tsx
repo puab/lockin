@@ -6,7 +6,7 @@ import { COLORS, ICONS } from '../../../Theme';
 import { useAppStore } from '../../../store';
 import { useShallow } from 'zustand/react/shallow';
 import useErrorStack from '../../../hooks/useErrorStack';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import IconSelector from './IconSelector';
 import FormTextField from '../../../components/FormTextField';
 import DailyGoalControl from './DailyGoalControl';
@@ -15,13 +15,21 @@ import { Habit } from '../Types';
 import { uuid } from '../../../Util';
 import HeaderText from '../../../components/HeaderText';
 
-type NewHabitSheetProps = {
+type CreateOrUpdateHabitSheetProps = {
     open: boolean;
     setOpen: (open: boolean) => void;
+    editTarget: Habit | null;
 };
 
-export default function NewHabitSheet({ open, setOpen }: NewHabitSheetProps) {
+export default function CreateOrUpdateHabitSheet({
+    open,
+    setOpen,
+    editTarget,
+}: CreateOrUpdateHabitSheetProps) {
+    const isEditing = !!editTarget;
+
     const addHabit = useAppStore(useShallow(s => s.addHabit));
+    const updateHabit = useAppStore(useShallow(s => s.updateHabit));
 
     const { errors, validate } = useErrorStack();
 
@@ -32,6 +40,7 @@ export default function NewHabitSheet({ open, setOpen }: NewHabitSheetProps) {
     const [color, setColor] = useState<string>('white');
 
     function reset() {
+        console.log('r');
         setName('');
         setDescription('');
         setDailyGoal(1);
@@ -39,21 +48,35 @@ export default function NewHabitSheet({ open, setOpen }: NewHabitSheetProps) {
         setColor('white');
     }
 
-    function handleCreate() {
+    useEffect(() => {
+        if (!open) return;
+
+        if (isEditing) {
+            setName(editTarget.name);
+            setDescription(editTarget.description);
+            setDailyGoal(editTarget.dailyGoal);
+            setIcon(editTarget.icon);
+            setColor(editTarget.color);
+        } else reset();
+    }, [open]);
+
+    function handleCreateOrUpdate() {
         const habit: Habit = {
-            id: uuid(),
+            id: isEditing ? editTarget.id : uuid(),
             name,
             description,
             icon,
             color,
             dailyGoal,
-            completionMatrix: {},
+            completionMatrix: isEditing ? editTarget.completionMatrix : {},
         };
 
         const v1 = validate('name', name.length > 0, 'Name is required');
 
         if (v1) {
-            addHabit(habit);
+            if (isEditing) updateHabit(habit);
+            else addHabit(habit);
+
             setOpen(false);
         }
     }
@@ -63,13 +86,12 @@ export default function NewHabitSheet({ open, setOpen }: NewHabitSheetProps) {
             open={open}
             setOpen={setOpen}
             handleColor={COLORS[color]}
-            onDismiss={reset}
         >
             {useMemo(
                 () => (
                     <View style={S.header}>
                         <HeaderText style={{ color: COLORS[color] }}>
-                            New task
+                            {isEditing ? 'Update' : 'New'} habit
                         </HeaderText>
 
                         <IconSelector
@@ -112,24 +134,19 @@ export default function NewHabitSheet({ open, setOpen }: NewHabitSheetProps) {
             <Button
                 mode='contained'
                 style={{ backgroundColor: COLORS[color] }}
-                onPress={handleCreate}
+                onPress={handleCreateOrUpdate}
                 icon={icon}
             >
-                Create
+                {isEditing ? 'Update' : 'Create'}
             </Button>
         </BottomSheet>
     );
 }
 
 const S = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingHorizontal: 15,
-        paddingBottom: 10,
-        gap: 10,
-    },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
+        alignItems: 'center',
     },
 });
