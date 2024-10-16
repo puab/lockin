@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import BottomSheet from '../../../components/BottomSheet';
 import { COLORS, ICONS } from '../../../Theme';
 import { StyleSheet, View } from 'react-native';
@@ -8,15 +8,28 @@ import { Button, Divider } from 'react-native-paper';
 import ColorSelector from '../../../components/ColorSelector';
 import FormTextField from '../../../components/FormTextField';
 import useErrorStack from '../../../hooks/useErrorStack';
-import { GoalStep } from '../Types';
+import { Goal, GoalStep } from '../Types';
 import GoalStepController from './GoalStepController';
+import { uuid } from '../../../Util';
+import { useAppStore } from '../../../store';
+import { useShallow } from 'zustand/react/shallow';
 
-type NewGoalSheetProps = {
+type CreateOrUpdateGoalSheetProps = {
     open: boolean;
     setOpen: (open: boolean) => void;
+    editTarget: Goal | null;
 };
 
-export default function NewGoalSheet({ open, setOpen }: NewGoalSheetProps) {
+export default function CreateOrUpdateGoalSheet({
+    open,
+    setOpen,
+    editTarget,
+}: CreateOrUpdateGoalSheetProps) {
+    const isEditing = !!editTarget;
+
+    const createGoal = useAppStore(useShallow(s => s.createGoal));
+    const updateGoal = useAppStore(useShallow(s => s.updateGoal));
+
     const { errors, validate } = useErrorStack();
 
     const [name, setName] = useState<string>('');
@@ -24,25 +37,70 @@ export default function NewGoalSheet({ open, setOpen }: NewGoalSheetProps) {
     const [icon, setIcon] = useState<string>(ICONS[0]);
     const [color, setColor] = useState<string>('white');
     const [steps, setSteps] = useState<GoalStep[]>([]);
+    const [completed, setCompleted] = useState<boolean>(false);
 
     const [endAtDate, setEndAtDate] = useState<Date | undefined>(undefined);
 
-    function reset() {}
+    function reset() {
+        setName('');
+        setReason('');
+        setIcon(ICONS[0]);
+        setColor('white');
+        setSteps([]);
+        setEndAtDate(undefined);
+    }
 
-    function handleCreate() {}
+    useEffect(() => {
+        if (!open) return;
+
+        if (isEditing) {
+            setName(editTarget.name);
+            setReason(editTarget.reason);
+            setIcon(editTarget.icon);
+            setColor(editTarget.color);
+            setSteps(editTarget.steps);
+            setCompleted(editTarget.completed);
+            setEndAtDate(
+                editTarget.endAt ? new Date(editTarget.endAt) : undefined
+            );
+        } else reset();
+    }, [open]);
+
+    function handleCreate() {
+        const goal: Goal = {
+            id: isEditing ? editTarget.id : uuid(),
+            name,
+            reason,
+            color,
+            icon,
+            steps,
+            completed,
+            endAt: endAtDate?.getTime(),
+        };
+
+        const v1 = validate('name', !!name, 'Name is required');
+        const v2 = validate('reason', !!reason, 'Reason is required');
+
+        if (v1 && v2) {
+            if (isEditing) updateGoal(goal);
+            else createGoal(goal);
+
+            reset();
+            setOpen(false);
+        }
+    }
 
     return (
         <BottomSheet
             open={open}
             setOpen={setOpen}
             handleColor={COLORS[color]}
-            onDismiss={reset}
         >
             {useMemo(
                 () => (
                     <View style={S.header}>
                         <HeaderText style={{ color: COLORS[color] }}>
-                            New goal
+                            {isEditing ? 'Update' : 'New'} goal
                         </HeaderText>
 
                         <IconSelector
@@ -67,9 +125,12 @@ export default function NewGoalSheet({ open, setOpen }: NewGoalSheetProps) {
                 value={reason}
                 onChange={setReason}
                 errors={errors.reason}
+                multiline
+                numberOfLines={2}
             />
 
             <GoalStepController
+                isEditing={isEditing}
                 value={steps}
                 onChange={setSteps}
             />
@@ -87,7 +148,7 @@ export default function NewGoalSheet({ open, setOpen }: NewGoalSheetProps) {
                 onPress={handleCreate}
                 icon={icon}
             >
-                Create
+                {isEditing ? 'Update' : 'Create'}
             </Button>
         </BottomSheet>
     );

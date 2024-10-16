@@ -11,18 +11,18 @@ import AddItemButton from '../../components/AddItemButton';
 import { useAppStore } from '../../store';
 import { useShallow } from 'zustand/react/shallow';
 import CreateOrUpdateTaskSheet from './components/CreateOrUpdateTaskSheet';
-import { useFocusEffect } from '@react-navigation/native';
 import useSheetBack from '../../hooks/useSheetBack';
 
 export default function TasksScreen({ route, navigation }) {
     const [taskSheetOpen, setTaskSheetOpen] = useState<boolean>(false);
     useSheetBack(taskSheetOpen, setTaskSheetOpen);
 
-    const [deleteTask, addTask] = useAppStore(
-        useShallow(s => [s.deleteTask, s.addTask])
+    const [deleteTask, createTask] = useAppStore(
+        useShallow(s => [s.deleteTask, s.createTask])
     );
 
     const tasks = useAppStore(s => s.tasks);
+    // console.log(tasks.map(t => t.notificationId).join(', '));
 
     const currentDateMs = route?.params?.currentDateMs;
 
@@ -43,12 +43,6 @@ export default function TasksScreen({ route, navigation }) {
         if (currentDateMs) setCurDate(DateTime.fromMillis(currentDateMs));
     }, [currentDateMs]);
 
-    const editTargetRef = useRef<Task | null>(null);
-    function wantsEdit(task: Task) {
-        editTargetRef.current = task;
-        setTaskSheetOpen(true);
-    }
-
     const [justDeleted, setJustDeleted] = useState<boolean>(false);
     const deleteTargetRef = useRef<Task | null>(null);
     function wantsDelete(task: Task) {
@@ -57,8 +51,16 @@ export default function TasksScreen({ route, navigation }) {
         setJustDeleted(true);
     }
 
+    const editTargetRef = useRef<Task | null>(null);
+    function wantsEdit(task: Task) {
+        editTargetRef.current = task;
+        setJustDeleted(false);
+        setTaskSheetOpen(true);
+    }
+
     function wantsCreate() {
         editTargetRef.current = null;
+        setJustDeleted(false);
         setTaskSheetOpen(true);
     }
 
@@ -116,7 +118,7 @@ export default function TasksScreen({ route, navigation }) {
                                 label: 'Undo',
                                 onPress: () => {
                                     if (deleteTargetRef.current) {
-                                        addTask(deleteTargetRef.current);
+                                        createTask(deleteTargetRef.current);
                                     }
                                 },
                             }}

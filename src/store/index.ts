@@ -31,6 +31,7 @@ export const useAppStore = create<AppStore>()(
             partialize: state => ({
                 tasks: state.tasks,
                 habits: state.habits,
+                goals: state.goals,
             }),
             onRehydrateStorage: state => {
                 return () => {

@@ -1,4 +1,4 @@
-import { DateTime } from 'luxon';
+import { DateTime, Duration, DurationObjectUnits } from 'luxon';
 
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
@@ -43,4 +43,26 @@ export const pluralize = (count: number, noun: string, suffix = 's') =>
 
 export function delay(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+export function secondsToHuman(seconds: number) {
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+
+    let timeString = '';
+
+    if (days > 0) {
+        timeString += `${days} day${days > 1 ? 's' : ''}, `;
+    }
+
+    if (hours > 0) {
+        timeString += `${hours} hour${hours > 1 ? 's' : ''}, `;
+    }
+
+    if (minutes > 0) {
+        timeString += `${minutes} minute${minutes > 1 ? 's' : ''}`;
+    }
+
+    return timeString;
 }

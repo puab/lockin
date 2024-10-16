@@ -10,13 +10,25 @@ import { useShallow } from 'zustand/react/shallow';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 
 import * as Haptics from 'expo-haptics';
+import GoalItem from './GoalItem';
 
 type GoalListProps = {
     goals: Goal[];
     wantsCreate: () => void;
+    wantsEdit: (goal: Goal) => void;
+    wantsDelete: (goal: Goal) => void;
+    nonIdealTitle: string;
+    nonIdealMessage: string;
 };
 
-export default function GoalList({ goals, wantsCreate }: GoalListProps) {
+export default function GoalList({
+    goals,
+    wantsCreate,
+    wantsEdit,
+    wantsDelete,
+    nonIdealTitle,
+    nonIdealMessage,
+}: GoalListProps) {
     const overwriteGoals = useAppStore(useShallow(s => s.overwriteGoals));
 
     const renderItem = ({ item, drag }) => (
@@ -27,24 +39,22 @@ export default function GoalList({ goals, wantsCreate }: GoalListProps) {
                     drag();
                 }}
             >
-                {/* <HabitItem
-                    habit={item}
-                    wantsCompletion={() => wantsCompletion(item)}
-                    wantsDelete={() => wantsDelete(item)}
+                <GoalItem
+                    goal={item}
                     wantsEdit={() => wantsEdit(item)}
-                    wantsFakeData={() => wantsFakeData(item)}
-                /> */}
+                    wantsDelete={() => wantsDelete(item)}
+                />
             </TouchableWithoutFeedback>
         </ScaleDecorator>
     );
 
     return (
-        <View style={{ marginTop: 5 }}>
+        <View style={{ marginTop: 10 }}>
             {goals?.length === 0 ? (
                 <NonIdealState
                     icon='crosshairs-question'
-                    title='No goals'
-                    message='Create a goal to get started'
+                    title={nonIdealTitle}
+                    message={nonIdealMessage}
                 >
                     <Button
                         style={{ marginRight: 15 }}

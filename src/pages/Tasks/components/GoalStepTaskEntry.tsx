@@ -1,33 +1,33 @@
 import { useState } from 'react';
-import { Task } from '../Types';
 import AppTheme, { COLORS } from '../../../Theme';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { StyleSheet, View } from 'react-native';
 import { Menu, RadioButton, Text } from 'react-native-paper';
 import { useAppStore } from '../../../store';
 import { useShallow } from 'zustand/react/shallow';
+import { GoalStepTask } from '../../Goals/Types';
 
-type TaskEntryProps = {
-    task: Task;
-    wantsEdit: () => void;
-    wantsDelete: () => void;
+type GoalStepTaskEntryProps = {
+    step: GoalStepTask;
+    activeDateStr: string;
+    wantsSeeGoal: () => void;
 };
 
-export default function TaskEntry({
-    task,
-    wantsEdit,
-    wantsDelete,
-}: TaskEntryProps) {
-    const toggleTaskCompletion = useAppStore(
-        useShallow(s => s.toggleTaskCompletion)
+export default function GoalStepTaskEntry({
+    step,
+    activeDateStr,
+    wantsSeeGoal,
+}: GoalStepTaskEntryProps) {
+    const toggleGoalStepCompletion = useAppStore(
+        useShallow(s => s.toggleGoalStepCompletion)
     );
 
-    const taskHex = COLORS[task.color];
+    const goalHex = COLORS[step.goalColor];
 
     const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
-    function toggleTask() {
-        toggleTaskCompletion(task);
+    function toggleGoalStep() {
+        toggleGoalStepCompletion(step, activeDateStr);
     }
 
     const doubleTap = Gesture.Tap()
@@ -35,20 +35,30 @@ export default function TaskEntry({
         .onStart(() => setMenuOpen(true));
 
     const el = (
-        <View style={[entry.container, { borderLeftColor: taskHex }]}>
+        <View style={[entry.container, { borderLeftColor: goalHex }]}>
             <View style={entry.left}>
                 <RadioButton
-                    value={task.id}
-                    status={task.completed ? 'checked' : 'unchecked'}
-                    color={taskHex}
-                    uncheckedColor={taskHex}
-                    onPress={toggleTask}
+                    value={step.id}
+                    status={
+                        step.completedDates?.includes(activeDateStr)
+                            ? 'checked'
+                            : 'unchecked'
+                    }
+                    color={goalHex}
+                    uncheckedColor={goalHex}
+                    onPress={toggleGoalStep}
                 />
             </View>
 
             <GestureDetector gesture={doubleTap}>
                 <View style={entry.right}>
-                    <Text style={entry.description}>{task.description}</Text>
+                    {step.goalName && (
+                        <Text style={{ color: goalHex, fontSize: 10 }}>
+                            {step.goalName}
+                        </Text>
+                    )}
+
+                    <Text style={entry.description}>{step.name}</Text>
                 </View>
             </GestureDetector>
         </View>
@@ -66,20 +76,10 @@ export default function TaskEntry({
             <Menu.Item
                 onPress={() => {
                     setMenuOpen(false);
-                    wantsEdit();
+                    wantsSeeGoal();
                 }}
-                title='Edit'
-                leadingIcon='pencil'
-            />
-            <Menu.Item
-                onPress={() => {
-                    setMenuOpen(false);
-                    wantsDelete();
-                }}
-                title='Delete'
-                leadingIcon='delete'
-                titleStyle={{ color: 'red' }}
-                theme={{ colors: { onSurfaceVariant: 'red' } }}
+                title='Go to goal'
+                leadingIcon='flag-checkered'
             />
         </Menu>
     );

@@ -1,9 +1,9 @@
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
 import { AppContextProvider } from './contexts/AppContext';
-import { DateTime } from 'luxon';
 import { Icon, PaperProvider } from 'react-native-paper';
 import AppTheme from './Theme';
+import Toast, { BaseToast } from 'react-native-toast-message';
 
 import HomeScreen from './pages/Home';
 import JournalScreen from './pages/Journal';
@@ -16,10 +16,19 @@ import '../gesture-handler';
 import { enGB, registerTranslation } from 'react-native-paper-dates';
 registerTranslation('en-GB', enGB);
 
-import HeaderBackButton from './components/HeaderBackButton';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import GoalsScreen from './pages/Goals';
+
+import * as Notifications from 'expo-notifications';
+
+Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+    }),
+});
 
 const Drawer = createDrawerNavigator();
 
@@ -31,6 +40,34 @@ export default function App() {
                     <PaperProvider theme={AppTheme}>
                         <BottomSheetModalProvider>
                             <Root />
+
+                            <Toast
+                                config={{
+                                    success: props => (
+                                        <BaseToast
+                                            {...props}
+                                            style={{
+                                                borderLeftColor:
+                                                    AppTheme.colors.primary,
+                                            }}
+                                            contentContainerStyle={{
+                                                backgroundColor:
+                                                    AppTheme.colors
+                                                        .inverseOnSurface,
+                                            }}
+                                            text1Style={{
+                                                color: AppTheme.colors.primary,
+                                                fontSize: 18,
+                                                fontWeight: 'bold',
+                                            }}
+                                            text2Style={{
+                                                color: 'white',
+                                                fontSize: 14,
+                                            }}
+                                        />
+                                    ),
+                                }}
+                            />
                         </BottomSheetModalProvider>
                     </PaperProvider>
                 </AppContextProvider>

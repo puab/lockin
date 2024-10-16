@@ -1,15 +1,15 @@
-import { FlatListComponent, ScrollView, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Habit } from '../Types';
 import AppTheme, { COLORS } from '../../../Theme';
 import { Icon, Menu, Text } from 'react-native-paper';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
     Gesture,
     GestureDetector,
     TouchableOpacity,
 } from 'react-native-gesture-handler';
 import HabitCalendar from './HabitCalendar';
-import { DateNow, DateNowStr } from '../../../Util';
+import { DateNowStr } from '../../../Util';
 
 type HabitItemProps = {
     habit: Habit;

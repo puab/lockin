@@ -1,8 +1,6 @@
-import SectionDivider from '../../components/SectionDivider';
 import { StyleSheet, View } from 'react-native';
 
 import PageLayout from '../../components/PageLayout';
-import { Text } from 'react-native-paper';
 import { useAppContext } from '../../contexts/AppContext';
 import TaskBlock from './components/TaskBlock';
 import HabitBlock from './components/HabitBlock';

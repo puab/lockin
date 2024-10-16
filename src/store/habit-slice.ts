@@ -4,7 +4,7 @@ import { StateCreator } from 'zustand';
 
 export type HabitSlice = {
     habits: Habit[];
-    addHabit: (habit: Habit) => void;
+    createHabit: (habit: Habit) => void;
     deleteHabit: (habit: Habit) => void;
     updateHabit: (habit: Habit) => void;
     addCompletionToHabit: (habit: Habit, dayStr?: string) => void;
@@ -17,7 +17,7 @@ export const createHabitSlice: StateCreator<HabitSlice, [], [], HabitSlice> = (
     get
 ) => ({
     habits: [],
-    addHabit: newHabit => {
+    createHabit: newHabit => {
         set(state => ({
             habits: [
                 {

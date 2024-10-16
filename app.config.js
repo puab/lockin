@@ -3,11 +3,15 @@ module.export = {
     slug: 'organizo',
     version: '1.0.0',
     orientation: 'portrait',
-    icon: './assets/icon.png',
-    userInterfaceStyle: 'light',
+    icon: './assets/lockin.png',
+    userInterfaceStyle: 'dark',
     entryPoint: './src/App.tsx',
+    notification: {
+        icon: './assets/lockin.png',
+        color: '#ff0000',
+    },
     splash: {
-        image: './assets/splash.png',
+        image: './assets/lockin.png',
         resizeMode: 'contain',
         backgroundColor: '#ffffff',
     },
@@ -23,4 +27,13 @@ module.export = {
     web: {
         favicon: './assets/favicon.png',
     },
+    plugins: [
+        [
+            'expo-notifications',
+            {
+                icon: './assets/lockin.png',
+                color: '#ff0000',
+            },
+        ],
+    ],
 };

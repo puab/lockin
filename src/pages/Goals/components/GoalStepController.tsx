@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
-import { Goal, GoalStep } from '../Types';
-import { Icon, Menu, Text } from 'react-native-paper';
+import { GoalStep } from '../Types';
+import { Icon, Menu, RadioButton, Text } from 'react-native-paper';
 import AppTheme, { INPUT_CONTAINER_STYLE } from '../../../Theme';
 import {
     Gesture,
@@ -15,23 +15,33 @@ import { WEEKDAYS_STR } from '../../../Util';
 type GoalStepControllerProps = {
     value: GoalStep[];
     onChange: (step: GoalStep[]) => void;
+    isEditing: boolean;
 };
 
 export default function GoalStepController({
     value,
     onChange,
+    isEditing,
 }: GoalStepControllerProps) {
     const [steps, setSteps] = useState<GoalStep[]>(value);
     useEffect(() => onChange(steps), [steps]);
 
     const [stepDialogOpen, setStepDialogOpen] = useState<boolean>(false);
 
-    function onAdd(step: GoalStep) {
+    function addStep(step: GoalStep) {
         setSteps([...steps, step]);
     }
 
-    function onUpdate(step: GoalStep) {
+    function updateStep(step: GoalStep) {
         setSteps(curSteps => curSteps.map(s => (s.id === step.id ? step : s)));
+    }
+
+    function toggleStepCompletion(step: GoalStep) {
+        setSteps(curSteps =>
+            curSteps.map(s =>
+                s.id === step.id ? { ...s, completed: !s.completed } : s
+            )
+        );
     }
 
     const editTargetRef = useRef<GoalStep | null>(null);
@@ -66,6 +76,9 @@ export default function GoalStepController({
                             step={step}
                             wantsDelete={wantsDelete}
                             wantsEdit={wantsEdit}
+                            wantsToggle={
+                                isEditing ? toggleStepCompletion : undefined
+                            }
                         />
                     ))}
                 </ScrollView>
@@ -87,8 +100,8 @@ export default function GoalStepController({
             <CreateOrUpdateStepDialog
                 open={stepDialogOpen}
                 setOpen={setStepDialogOpen}
-                onAdd={onAdd}
-                onUpdate={onUpdate}
+                onAdd={addStep}
+                onUpdate={updateStep}
                 editTarget={editTargetRef.current}
             />
         </>
@@ -99,9 +112,15 @@ type GoalStepEntryProps = {
     step: GoalStep;
     wantsEdit: (step: GoalStep) => void;
     wantsDelete: (step: GoalStep) => void;
+    wantsToggle?: (step: GoalStep) => void;
 };
 
-function GoalStepEntry({ step, wantsEdit, wantsDelete }: GoalStepEntryProps) {
+export function GoalStepEntry({
+    step,
+    wantsEdit,
+    wantsDelete,
+    wantsToggle,
+}: GoalStepEntryProps) {
     const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
     const tap = Gesture.Tap()
@@ -109,8 +128,18 @@ function GoalStepEntry({ step, wantsEdit, wantsDelete }: GoalStepEntryProps) {
         .onStart(() => setMenuOpen(true));
 
     const el = (
-        <GestureDetector gesture={tap}>
-            <View style={S.stepEntry}>
+        <View style={S.stepEntry}>
+            {step.repeat === false && wantsToggle && (
+                <RadioButton
+                    value={step.id}
+                    status={step.completed ? 'checked' : 'unchecked'}
+                    color={AppTheme.colors.primary}
+                    uncheckedColor={AppTheme.colors.primary}
+                    onPress={() => wantsToggle(step)}
+                />
+            )}
+
+            <GestureDetector gesture={tap}>
                 <View style={S.stepText}>
                     {step.repeat !== false && (
                         <Text
@@ -142,18 +171,18 @@ function GoalStepEntry({ step, wantsEdit, wantsDelete }: GoalStepEntryProps) {
                         </Text>
                     )}
                 </View>
+            </GestureDetector>
 
-                {step.showInTaskList && (
-                    <View style={{ marginLeft: 'auto' }}>
-                        <Icon
-                            size={24}
-                            source='format-list-checks'
-                            color={AppTheme.colors.primary}
-                        />
-                    </View>
-                )}
-            </View>
-        </GestureDetector>
+            {step.showInTaskList && (
+                <View style={{ marginLeft: 'auto' }}>
+                    <Icon
+                        size={24}
+                        source='format-list-checks'
+                        color={AppTheme.colors.primary}
+                    />
+                </View>
+            )}
+        </View>
     );
 
     return (

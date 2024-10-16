@@ -9,6 +9,13 @@ export type GoalStep = {
     // [1, 3] - monday, wednesday
     repeat: false | true | number[];
     showInTaskList?: boolean;
+    completedDates?: string[]; // yyyy-LL-dd
+};
+
+export type GoalStepTask = GoalStep & {
+    goalColor: string;
+    goalName: string;
+    goalId: string;
 };
 
 export type Goal = {
@@ -24,6 +31,6 @@ export type Goal = {
     completed: boolean;
     endAt?: number;
 
-    createdAt: number;
-    updatedAt: number;
+    createdAt?: number;
+    updatedAt?: number;
 };

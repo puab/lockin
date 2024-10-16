@@ -5,7 +5,7 @@ import { DateTime } from 'luxon';
 export type TaskSlice = {
     tasks: Task[];
     clearOldTasks: () => void;
-    addTask: (task: Task) => void;
+    createTask: (task: Task) => void;
     deleteTask: (task: Task) => void;
     toggleTaskCompletion: (task: Task) => void;
     updateTask: (task: Task) => void;
@@ -36,7 +36,7 @@ export const createTaskSlice: StateCreator<TaskSlice, [], [], TaskSlice> = (
             }),
         }));
     },
-    addTask: newTask => {
+    createTask: newTask => {
         set(state => ({
             tasks: [
                 {

@@ -23,10 +23,9 @@ export default function HabitScreen({ navigation }) {
     const populateFakeCompletion = useAppStore(
         useShallow(s => s.populateFakeCompletion)
     );
-    const addHabit = useAppStore(useShallow(s => s.addHabit));
+    const createHabit = useAppStore(useShallow(s => s.createHabit));
 
     function wantsCompletion(habit: Habit) {
-        console.log('wants', habit.name);
         addCompletionToHabit(habit);
     }
 
@@ -38,7 +37,6 @@ export default function HabitScreen({ navigation }) {
         setJustDeleted(true);
     }
 
-    const [isEditing, setEditing] = useState<boolean>(false);
     const editTargetRef = useRef<Habit | null>(null);
     function wantsEdit(habit: Habit) {
         editTargetRef.current = habit;
@@ -93,7 +91,7 @@ export default function HabitScreen({ navigation }) {
                         editTarget={editTargetRef.current}
                     />
                 ),
-                [isEditing, habitSheetOpen]
+                [habitSheetOpen]
             )}
 
             {useMemo(
@@ -109,7 +107,7 @@ export default function HabitScreen({ navigation }) {
                                 label: 'Undo',
                                 onPress: () => {
                                     if (deleteTargetRef.current) {
-                                        addHabit(deleteTargetRef.current);
+                                        createHabit(deleteTargetRef.current);
                                     }
                                 },
                             }}

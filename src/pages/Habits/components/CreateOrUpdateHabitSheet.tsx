@@ -28,7 +28,7 @@ export default function CreateOrUpdateHabitSheet({
 }: CreateOrUpdateHabitSheetProps) {
     const isEditing = !!editTarget;
 
-    const addHabit = useAppStore(useShallow(s => s.addHabit));
+    const createHabit = useAppStore(useShallow(s => s.createHabit));
     const updateHabit = useAppStore(useShallow(s => s.updateHabit));
 
     const { errors, validate } = useErrorStack();
@@ -40,7 +40,6 @@ export default function CreateOrUpdateHabitSheet({
     const [color, setColor] = useState<string>('white');
 
     function reset() {
-        console.log('r');
         setName('');
         setDescription('');
         setDailyGoal(1);
@@ -75,7 +74,7 @@ export default function CreateOrUpdateHabitSheet({
 
         if (v1) {
             if (isEditing) updateHabit(habit);
-            else addHabit(habit);
+            else createHabit(habit);
 
             setOpen(false);
         }
@@ -119,10 +118,12 @@ export default function CreateOrUpdateHabitSheet({
                 multiline
             />
 
-            <DailyGoalControl
-                value={dailyGoal}
-                setValue={setDailyGoal}
-            />
+            {!isEditing && (
+                <DailyGoalControl
+                    value={dailyGoal}
+                    setValue={setDailyGoal}
+                />
+            )}
 
             <Divider style={{ marginTop: 'auto' }} />
 
