@@ -5,13 +5,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createTaskSlice, TaskSlice } from './task-slice';
 import { createHabitSlice, HabitSlice } from './habit-slice';
 import { createGoalSlice, GoalSlice } from './goal-slice';
+import { createJournalSlice, JournalSlice } from './journal-slice';
 
 type AppStore = {
     _hasHydrated: boolean;
     _setHasHydrated: (val: boolean) => void;
 } & TaskSlice &
     HabitSlice &
-    GoalSlice;
+    GoalSlice &
+    JournalSlice;
 
 export const useAppStore = create<AppStore>()(
     persist(
@@ -24,6 +26,7 @@ export const useAppStore = create<AppStore>()(
             ...createTaskSlice(...a),
             ...createHabitSlice(...a),
             ...createGoalSlice(...a),
+            ...createJournalSlice(...a),
         }),
         {
             name: 'app-storage',
@@ -32,6 +35,7 @@ export const useAppStore = create<AppStore>()(
                 tasks: state.tasks,
                 habits: state.habits,
                 goals: state.goals,
+                journals: state.journals,
             }),
             onRehydrateStorage: state => {
                 return () => {

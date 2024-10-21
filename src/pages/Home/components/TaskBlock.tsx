@@ -1,11 +1,10 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import AppTheme from '../../../Theme';
 import { Icon, Text } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { DateNowStr, pluralize } from '../../../Util';
+import { DateNowStr } from '../../../Util';
 import { DateTime } from 'luxon';
-import Block from './Block';
 import { useAppStore } from '../../../store';
 
 export default function TaskBlock() {
@@ -21,44 +20,45 @@ export default function TaskBlock() {
     const completedCount = tasksToday.filter(t => t.completed).length;
 
     return (
-        <Block
-            style={S.container}
-            onPress={goToTasks}
-        >
-            <Text style={S.text}>
-                {tasksToday.length > 0 ? `${tasksToday.length}` : `No`}{' '}
-                {pluralize(tasksToday.length, 'task', 's')} today
-            </Text>
-            <View style={S.right}>
-                {tasksToday.length > 0 && (
-                    <Text style={S.text}>
-                        {completedCount} / {tasksToday.length}
-                    </Text>
-                )}
-                <Icon
-                    source={'menu-right'}
-                    size={48}
-                    color={AppTheme.colors.primary}
-                />
-            </View>
-        </Block>
+        <View style={S.container}>
+            <TouchableOpacity
+                onPress={goToTasks}
+                style={S.inner}
+            >
+                <Text style={S.text}>Tasks</Text>
+                <View style={S.right}>
+                    {tasksToday.length > 0 && (
+                        <Text style={S.text}>
+                            {completedCount} / {tasksToday.length}
+                        </Text>
+                    )}
+                    <Icon
+                        source={'menu-right'}
+                        size={36}
+                        color={AppTheme.colors.primary}
+                    />
+                </View>
+            </TouchableOpacity>
+        </View>
     );
 }
 
 const S = StyleSheet.create({
     container: {
-        padding: 5,
-        paddingLeft: 15,
+        padding: 10,
         backgroundColor: AppTheme.colors.inverseOnSurface,
+
+        borderRadius: 10,
+    },
+    inner: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        borderRadius: 10,
     },
     right: {
         flexDirection: 'row',
         gap: 10,
         alignItems: 'center',
     },
-    text: { color: AppTheme.colors.primary, fontSize: 18 },
+    text: { color: AppTheme.colors.primary, fontSize: 18, fontWeight: 'bold' },
 });

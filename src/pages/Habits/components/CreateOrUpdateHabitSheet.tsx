@@ -1,7 +1,6 @@
-import { DateTime } from 'luxon';
 import BottomSheet from '../../../components/BottomSheet';
-import { KeyboardAvoidingView, StyleSheet, View } from 'react-native';
-import { Button, Divider, Text } from 'react-native-paper';
+import { StyleSheet, View } from 'react-native';
+import { Button, Divider } from 'react-native-paper';
 import { COLORS, ICONS } from '../../../Theme';
 import { useAppStore } from '../../../store';
 import { useShallow } from 'zustand/react/shallow';
@@ -118,12 +117,10 @@ export default function CreateOrUpdateHabitSheet({
                 multiline
             />
 
-            {!isEditing && (
-                <DailyGoalControl
-                    value={dailyGoal}
-                    setValue={setDailyGoal}
-                />
-            )}
+            <DailyGoalControl
+                value={dailyGoal}
+                setValue={setDailyGoal}
+            />
 
             <Divider style={{ marginTop: 'auto' }} />
 

@@ -1,9 +1,9 @@
-import { BackHandler, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import PageLayout from '../../components/PageLayout';
 import { DateNow } from '../../Util';
 import DateRow from './components/DateRow';
 import { DateTime } from 'luxon';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Divider, Portal, Snackbar, Text } from 'react-native-paper';
 import TaskList from './components/TaskList';
 import { Task } from './Types';

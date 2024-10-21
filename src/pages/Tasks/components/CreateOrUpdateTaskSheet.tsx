@@ -1,4 +1,4 @@
-import { KeyboardAvoidingView, StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import BottomSheet from '../../../components/BottomSheet';
 import {
     Button,
@@ -6,10 +6,9 @@ import {
     Divider,
     HelperText,
     SegmentedButtons,
-    Text,
 } from 'react-native-paper';
 import AppTheme, { COLORS } from '../../../Theme';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import useErrorStack from '../../../hooks/useErrorStack';
 import { DatePickerInput } from 'react-native-paper-dates';
 import { DateTime } from 'luxon';
@@ -75,7 +74,7 @@ export default function CreateOrUpdateTaskSheet({
             setDescription(editTarget.description);
             setColor(editTarget.color);
             setRemindMe(editTarget.remindMe);
-            setRemindType(editTarget.remindType);
+            setRemindType(editTarget.remindType ?? 'morning-of');
             setNotificationId(editTarget.notificationId);
             setCompleted(editTarget.completed);
         } else reset();

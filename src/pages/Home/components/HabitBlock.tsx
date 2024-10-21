@@ -1,16 +1,16 @@
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { useAppContext } from '../../../contexts/AppContext';
-import Block from './Block';
 import AppTheme, { COLORS } from '../../../Theme';
 import { CircularProgressBase } from 'react-native-circular-progress-indicator';
 import { Habit } from '../../Habits/Types';
 import { DateNowStr } from '../../../Util';
 import { Icon, Text } from 'react-native-paper';
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 import { useAppStore } from '../../../store';
 import { useShallow } from 'zustand/react/shallow';
+import { ScrollView } from 'react-native-gesture-handler';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function HabitBlock() {
     const nav = useNavigation<NativeStackNavigationProp<any>>();
@@ -30,38 +30,26 @@ export default function HabitBlock() {
         addCompletionToHabit(habit);
     }
 
-    const Wrapper = useCallback(({ children }) => {
-        if (habits.length !== 0)
-            return <View style={S.container}>{children}</View>;
+    return useMemo(
+        () => (
+            <View style={S.container}>
+                <TouchableOpacity onPress={goToHabits}>
+                    <View style={S.header}>
+                        <Text style={S.headerText}>Habits</Text>
 
-        return (
-            <TouchableOpacity
-                style={S.container}
-                onPress={goToHabits}
-            >
-                {children}
-            </TouchableOpacity>
-        );
-    }, []);
+                        <Icon
+                            source={'menu-right'}
+                            size={36}
+                            color={AppTheme.colors.primary}
+                        />
+                    </View>
+                </TouchableOpacity>
 
-    return (
-        <>
-            {useMemo(
-                () => (
-                    <Wrapper>
-                        {habits.length === 0 && (
-                            <>
-                                <Text style={S.noHabitText}>
-                                    No habits created
-                                </Text>
-                                <Icon
-                                    source={'menu-right'}
-                                    size={48}
-                                    color={AppTheme.colors.primary}
-                                />
-                            </>
-                        )}
-
+                {habits.length !== 0 && (
+                    <ScrollView
+                        contentContainerStyle={{ gap: 5 }}
+                        style={{ maxHeight: 150 }}
+                    >
                         {habits.map(h => (
                             <HabitButton
                                 key={`cp${h.id}`}
@@ -69,13 +57,42 @@ export default function HabitBlock() {
                                 wantsCompletion={() => wantsCompletion(h)}
                             />
                         ))}
-                    </Wrapper>
-                ),
-                [habits]
-            )}
-        </>
+                    </ScrollView>
+                )}
+            </View>
+        ),
+        [habits]
     );
 }
+
+const S = StyleSheet.create({
+    container: {
+        padding: 5,
+        backgroundColor: AppTheme.colors.inverseOnSurface,
+        borderRadius: 10,
+        gap: 5,
+        maxHeight: 250,
+    },
+
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 5,
+    },
+    headerText: {
+        fontWeight: 'bold',
+        fontSize: 18,
+        color: AppTheme.colors.primary,
+    },
+
+    noHabitText: {
+        color: AppTheme.colors.primary,
+        fontSize: 18,
+        marginRight: 'auto',
+        paddingLeft: 10,
+    },
+});
 
 type HabitButtonProps = {
     habit: Habit;
@@ -90,51 +107,67 @@ function HabitButton({ habit, wantsCompletion }: HabitButtonProps) {
     }
 
     return (
-        <TouchableOpacity onPress={handlePress}>
-            <CircularProgressBase
-                value={(countToday / habit.dailyGoal) * 100}
-                maxValue={100}
-                radius={20}
-                activeStrokeWidth={5}
-                inActiveStrokeWidth={5}
-                duration={150}
-                activeStrokeColor={COLORS[habit.color]}
+        <TouchableOpacity
+            onPress={handlePress}
+            disabled={countToday == habit.dailyGoal}
+        >
+            <LinearGradient
+                colors={[COLORS[habit.color] + '4B', 'transparent']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={[HB.container]}
             >
-                <Icon
-                    size={18}
-                    source={habit.icon}
-                    color={COLORS[habit.color]}
-                />
-            </CircularProgressBase>
-            {/* <Text>{countToday?.toString()}</Text> */}
+                <View
+                    style={{
+                        backgroundColor: AppTheme.colors.inverseOnSurface,
+                        borderRadius: 500,
+                    }}
+                >
+                    <CircularProgressBase
+                        value={(countToday / habit.dailyGoal) * 100}
+                        maxValue={100}
+                        radius={20}
+                        activeStrokeWidth={5}
+                        inActiveStrokeWidth={5}
+                        duration={150}
+                        activeStrokeColor={COLORS[habit.color]}
+                    >
+                        <Icon
+                            size={18}
+                            source={habit.icon}
+                            color={COLORS[habit.color]}
+                        />
+                    </CircularProgressBase>
+                </View>
+
+                <View style={HB.right}>
+                    <Text
+                        style={{
+                            fontSize: 18,
+                            fontWeight: 'bold',
+                        }}
+                        numberOfLines={1}
+                    >
+                        {habit.name}
+                    </Text>
+                </View>
+            </LinearGradient>
         </TouchableOpacity>
     );
 }
 
-const S = StyleSheet.create({
+const HB = StyleSheet.create({
     container: {
-        padding: 5,
-        backgroundColor: AppTheme.colors.inverseOnSurface,
-        borderRadius: 10,
         flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: 5,
-    },
-
-    noHabitText: {
-        color: AppTheme.colors.primary,
-        fontSize: 18,
-        marginRight: 'auto',
-        paddingLeft: 10,
-    },
-
-    piecesScrollView: {
-        flexGrow: 0,
-        flexShrink: 0,
-    },
-    piece: {
         padding: 5,
+        gap: 5,
+        borderRadius: 10,
+    },
+    right: {
+        justifyContent: 'center',
+        flex: 1,
+        paddingHorizontal: 10,
+        backgroundColor: AppTheme.colors.inverseOnSurface,
+        borderRadius: 5,
     },
 });

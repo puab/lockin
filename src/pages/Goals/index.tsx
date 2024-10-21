@@ -1,6 +1,6 @@
-import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import { StyleSheet, useWindowDimensions } from 'react-native';
 import PageLayout from '../../components/PageLayout';
-import { Button, Text } from 'react-native-paper';
+import { Button } from 'react-native-paper';
 import { useMemo, useRef, useState } from 'react';
 import useSheetBack from '../../hooks/useSheetBack';
 import CreateOrUpdateGoalSheet from './components/CreateOrUpdateGoalSheet';
@@ -9,7 +9,7 @@ import { Goal } from './Types';
 import { useAppStore } from '../../store';
 import GoalList from './components/GoalList';
 
-import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
+import { TabView, TabBar } from 'react-native-tab-view';
 import AppTheme from '../../Theme';
 import { useShallow } from 'zustand/react/shallow';
 

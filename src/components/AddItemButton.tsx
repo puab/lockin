@@ -1,7 +1,9 @@
-import { StyleSheet } from 'react-native';
+import { GestureResponderEvent, StyleSheet } from 'react-native';
 import { FAB } from 'react-native-paper';
 
-export default function AddItemButton({ onPress }) {
+type AddItemButtonProps = { onPress?: (e: GestureResponderEvent) => void };
+
+export default function AddItemButton({ onPress }: AddItemButtonProps) {
     return (
         <FAB
             icon={'plus'}
