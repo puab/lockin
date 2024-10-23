@@ -1,22 +1,12 @@
 import axios, { AxiosError } from 'axios';
 import * as SecureStore from 'expo-secure-store';
-import { Platform } from 'react-native';
 
 const ax = axios.create({
-    baseURL: 'http://192.168.39.4:8000',
+    baseURL: 'http://192.168.28.4:8090',
     headers: {
         Accept: 'application/json',
     },
-});
-
-ax.interceptors.request.use(async req => {
-    const token = await API.getToken();
-
-    if (token !== null) {
-        req.headers.Authorization = `Bearer ${token}`;
-    }
-
-    return req;
+    timeout: 5000,
 });
 
 function handleFetchError(e: any) {
@@ -29,92 +19,71 @@ function handleFetchError(e: any) {
     }
 }
 
-type ResponseType = Promise<{ [key: string]: any } | undefined>;
-
 class _API {
-    private token: string | null = null;
+    async ping() {
+        await new Promise(res => setTimeout(res, 1000));
 
-    constructor() {
-        this.getToken();
-    }
-
-    async setToken(newToken: string | null) {
-        this.token = newToken;
-
-        if (this.token !== null) {
-            await SecureStore.setItemAsync('token', this.token);
-        } else {
-            await SecureStore.deleteItemAsync('token');
-        }
-    }
-
-    async getToken() {
-        if (this.token !== null) {
-            return this.token;
-        }
-
-        this.token = await SecureStore.getItemAsync('token');
-        return this.token;
-    }
-
-    async loadUser() {
-        await this.getToken();
-
-        const { data: user } = await ax.get('/api/user');
-
-        return user;
-    }
-
-    async login(username: string, password: string): ResponseType {
         try {
-            const res = await ax.post('/api/login', {
+            const { data } = await ax.get('/ping');
+
+            return data.message === 'pong';
+        } catch (e) {
+            return false;
+        }
+    }
+
+    async checkCredentials(username: string, password: string) {
+        await new Promise(res => setTimeout(res, 1000));
+
+        try {
+            const { data } = await ax.post('/check-credentials', {
                 username,
                 password,
-                device_name: `${Platform.OS} ${Platform.Version}`,
             });
 
-            const success: boolean = res.data.token;
-            if (success) this.setToken(res.data.token);
-
-            return {
-                success,
-            };
-        } catch (e: any) {
+            return data;
+        } catch (e) {
             return handleFetchError(e);
         }
     }
 
-    async logout() {
+    async exportData(data: string) {
+        await new Promise(res => setTimeout(res, 1000));
+
         try {
-            await ax.post('/api/logout');
-            await this.setToken(null);
+            const savedUsername = await SecureStore.getItemAsync(
+                'savedUsername'
+            );
+
+            if (!savedUsername) throw 'No saved username';
+
+            const { data: res } = await ax.post('/export-data', {
+                data,
+                username: savedUsername,
+            });
+
+            return res;
         } catch (e) {
-            console.error(handleFetchError(e));
+            return handleFetchError(e);
         }
     }
 
-    async register(
-        username: string,
-        password: string,
-        passwordConfirmation: string,
-        email: string
-    ): ResponseType {
+    async importData() {
+        await new Promise(res => setTimeout(res, 1000));
+
         try {
-            const res = await ax.post('/api/register', {
-                username,
-                password,
-                password_confirmation: passwordConfirmation,
-                email,
-                device_name: `${Platform.OS} ${Platform.Version}`,
+            const savedUsername = await SecureStore.getItemAsync(
+                'savedUsername'
+            );
+
+            if (!savedUsername) throw 'No saved username';
+
+            const { data: res } = await ax.post('/import-data', {
+                username: savedUsername,
             });
 
-            const success: boolean = res.data.token;
-            if (success) this.setToken(res.data.token);
-
-            return {
-                success,
-            };
-        } catch (e: any) {
+            return res.data;
+        } catch (e) {
             return handleFetchError(e);
         }
     }

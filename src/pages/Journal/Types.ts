@@ -4,7 +4,7 @@ export type JournalEntry = {
     id: string;
 
     type: JournalEntryType;
-    content: string;
+    content: string | string[];
 
     createdAtDateStr?: string;
     createdAt?: number;

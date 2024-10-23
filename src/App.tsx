@@ -7,7 +7,6 @@ import Toast, { BaseToast } from 'react-native-toast-message';
 
 import HomeScreen from './pages/Home';
 import JournalScreen from './pages/Journal';
-import AuthScreen from './pages/Auth';
 import SettingsScreen from './pages/Settings';
 import TasksScreen from './pages/Tasks';
 import HabitScreen from './pages/Habits';
@@ -177,15 +176,6 @@ function Root() {
                             size={size}
                         />
                     ),
-                }}
-            />
-
-            <Drawer.Screen
-                name='Auth'
-                component={AuthScreen}
-                options={{
-                    headerShown: false,
-                    drawerItemStyle: { display: 'none' },
                 }}
             />
         </Drawer.Navigator>

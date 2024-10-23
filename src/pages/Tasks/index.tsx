@@ -22,7 +22,6 @@ export default function TasksScreen({ route, navigation }) {
     );
 
     const tasks = useAppStore(s => s.tasks);
-    // console.log(tasks.map(t => t.notificationId).join(', '));
 
     const currentDateMs = route?.params?.currentDateMs;
 

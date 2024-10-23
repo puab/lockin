@@ -1,7 +1,7 @@
 import { BottomSheetBackdrop, BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useEffect, useRef } from 'react';
 import AppTheme from '../Theme';
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
 
 type BottomSheetProps = {
     open: boolean;
@@ -21,7 +21,6 @@ export default function BottomSheet({
     const bottomSheetRef = useRef<BottomSheetModal>(null);
 
     useEffect(() => {
-        // console.log(open);
         if (open) {
             bottomSheetRef.current?.present();
         } else {

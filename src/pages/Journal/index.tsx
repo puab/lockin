@@ -1,13 +1,17 @@
 import AddItemButton from '../../components/AddItemButton';
 import PageLayout from '../../components/PageLayout';
-import { Menu, Text } from 'react-native-paper';
+import { Menu } from 'react-native-paper';
 import JournalList from './components/JournalList';
-import { useState } from 'react';
-import { GestureResponderEvent } from 'react-native';
+import { useMemo, useState } from 'react';
+import { GestureResponderEvent, StyleSheet } from 'react-native';
 import { JournalEntryType } from './Types';
 import CreateJournalEntrySheet from './components/CreateJournalEntrySheet';
+import useSheetBack from '../../hooks/useSheetBack';
+import { useAppStore } from '../../store';
 
 export default function JournalScreen() {
+    const journals = useAppStore(state => state.journals);
+
     const [menuOpen, setMenuOpen] = useState<boolean>(false);
     const [menuPos, setMenuPos] = useState<{ x: number; y: number }>({
         x: 0,
@@ -18,6 +22,7 @@ export default function JournalScreen() {
         useState<boolean>(false);
     const [createJournalType, setCreateJournalType] =
         useState<JournalEntryType>('note');
+    useSheetBack(createJournalSheetOpen, setCreateJournalSheetOpen);
 
     function wantsCreate(e: GestureResponderEvent) {
         setMenuPos({
@@ -34,7 +39,7 @@ export default function JournalScreen() {
     }
 
     return (
-        <PageLayout>
+        <PageLayout style={S.page}>
             <Menu
                 visible={menuOpen}
                 onDismiss={() => setMenuOpen(false)}
@@ -67,7 +72,19 @@ export default function JournalScreen() {
                 type={createJournalType}
             />
 
-            <JournalList />
+            {useMemo(
+                () => (
+                    <JournalList journals={journals} />
+                ),
+                [journals]
+            )}
         </PageLayout>
     );
 }
+
+const S = StyleSheet.create({
+    page: {
+        padding: 10,
+        paddingBottom: 0,
+    },
+});

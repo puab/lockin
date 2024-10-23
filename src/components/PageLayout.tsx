@@ -1,10 +1,4 @@
-import {
-    Platform,
-    SafeAreaView,
-    StatusBar,
-    StyleSheet,
-    ViewStyle,
-} from 'react-native';
+import { SafeAreaView, StyleSheet, ViewStyle } from 'react-native';
 import AppTheme from '../Theme';
 
 type PageLayoutProps = {

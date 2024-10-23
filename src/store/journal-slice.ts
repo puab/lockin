@@ -21,7 +21,9 @@ export const createJournalSlice: StateCreator<
                 {
                     ...newJournal,
                     createdAt: DateTime.now().toMillis(),
-                    createdAtDateStr: DateTime.now().toFormat('yyyy-LL-dd'),
+                    createdAtDateStr:
+                        DateTime.now()
+                        .toFormat('yyyy-LL-dd'),
                 },
             ],
         }));

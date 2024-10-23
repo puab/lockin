@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { View } from 'react-native';
 import { HelperText, TextInput } from 'react-native-paper';
 
 type FormTextFieldProps = {
@@ -12,6 +12,7 @@ type FormTextFieldProps = {
     style?: any;
     disabled?: boolean;
     editable?: boolean;
+    right?: React.ReactNode;
 };
 
 export default function FormTextField({
@@ -25,6 +26,7 @@ export default function FormTextField({
     style,
     disabled,
     editable,
+    right,
 }: FormTextFieldProps) {
     return (
         <View style={style}>
@@ -40,6 +42,7 @@ export default function FormTextField({
                 style={[{ maxHeight: 150 }]}
                 disabled={disabled}
                 editable={editable}
+                right={right}
             />
 
             {errors?.map((err, idx) => (
