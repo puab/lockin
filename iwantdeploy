@@ -1,0 +1,1 @@
+rsync -av ./backend/ root@bru.lv:/root/pb-lockin

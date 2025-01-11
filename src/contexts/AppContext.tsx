@@ -1,6 +1,3 @@
-import { useEffect, useState } from 'react';
-import API from '../API';
-
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/core';
 
@@ -10,20 +7,10 @@ import PageLayout from '../components/PageLayout';
 import { useAppStore } from '../store';
 
 export type AppContextType = {
-    user: any;
-    setUser: (u: any) => void;
-    checkingUser: boolean;
-    tryLoadUser: () => Promise<void>;
-
     nav: NativeStackNavigationProp<any> | null;
 };
 
 const AppContext = createContext<AppContextType>({
-    user: null,
-    setUser: () => {},
-    checkingUser: false,
-    tryLoadUser: async () => {},
-
     nav: null,
 });
 
@@ -32,31 +19,9 @@ export function AppContextProvider({ children }) {
 
     const nav = useNavigation<NativeStackNavigationProp<any>>();
 
-    const [user, setUser] = useState<any>(null);
-    const [checkingUser, setCheckingUser] = useState<boolean>(false);
-
-    async function tryLoadUser() {
-        try {
-            setCheckingUser(true);
-            const user = await API.loadUser();
-
-            // if passes to here then success, otherwise throws
-            setUser(user);
-            nav.navigate('Home');
-            setCheckingUser(false);
-        } catch (e) {
-            setCheckingUser(false);
-        }
-    }
-
     return (
         <AppContext.Provider
             value={{
-                user,
-                setUser,
-                checkingUser,
-                tryLoadUser,
-
                 nav,
             }}
         >

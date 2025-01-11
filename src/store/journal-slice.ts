@@ -5,6 +5,7 @@ import { DateTime } from 'luxon';
 export type JournalSlice = {
     journals: JournalEntry[];
     createJournal: (newJournal: JournalEntry) => void;
+    deleteJournal: (journal: JournalEntry) => void;
 };
 
 export const createJournalSlice: StateCreator<
@@ -21,11 +22,14 @@ export const createJournalSlice: StateCreator<
                 {
                     ...newJournal,
                     createdAt: DateTime.now().toMillis(),
-                    createdAtDateStr:
-                        DateTime.now()
-                        .toFormat('yyyy-LL-dd'),
+                    createdAtDateStr: DateTime.now().toFormat('yyyy-LL-dd'),
                 },
             ],
+        }));
+    },
+    deleteJournal: journal => {
+        set(state => ({
+            journals: state.journals.filter(j => j !== journal),
         }));
     },
 });

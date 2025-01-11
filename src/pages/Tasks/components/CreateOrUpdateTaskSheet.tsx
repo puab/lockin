@@ -286,6 +286,7 @@ export default function CreateOrUpdateTaskSheet({
                 mode='contained'
                 style={{ backgroundColor: COLORS[color] }}
                 onPress={handleCreateOrUpdate}
+                testID='create-or-update-task-button'
             >
                 {isEditing ? 'Update' : 'Create'}
             </Button>

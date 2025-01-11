@@ -7,13 +7,21 @@ import { createHabitSlice, HabitSlice } from './habit-slice';
 import { createGoalSlice, GoalSlice } from './goal-slice';
 import { createJournalSlice, JournalSlice } from './journal-slice';
 
+type AppDataType = TaskSlice & HabitSlice & GoalSlice & JournalSlice;
+
+export type SyncData = {
+    tasks: TaskSlice['tasks'];
+    habits: HabitSlice['habits'];
+    goals: GoalSlice['goals'];
+    journals: JournalSlice['journals'];
+};
+
 type AppStore = {
     _hasHydrated: boolean;
     _setHasHydrated: (val: boolean) => void;
-} & TaskSlice &
-    HabitSlice &
-    GoalSlice &
-    JournalSlice;
+
+    _importData: (data: SyncData) => void;
+} & AppDataType;
 
 export const useAppStore = create<AppStore>()(
     persist(
@@ -21,6 +29,15 @@ export const useAppStore = create<AppStore>()(
             _hasHydrated: false,
             _setHasHydrated: val => {
                 a[0](state => ({ _hasHydrated: val }));
+            },
+
+            _importData: data => {
+                a[0](state => ({
+                    tasks: data.tasks,
+                    habits: data.habits,
+                    goals: data.goals,
+                    journals: data.journals,
+                }));
             },
 
             ...createTaskSlice(...a),

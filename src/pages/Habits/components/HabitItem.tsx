@@ -1,19 +1,15 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Habit } from '../Types';
 import AppTheme, { COLORS } from '../../../Theme';
 import { Icon, Menu, Text } from 'react-native-paper';
 import { useState } from 'react';
-import {
-    Gesture,
-    GestureDetector,
-    TouchableOpacity,
-} from 'react-native-gesture-handler';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import HabitCalendar from './HabitCalendar';
 import { DateNowStr } from '../../../Util';
 
 type HabitItemProps = {
     habit: Habit;
-    wantsCompletion: () => void;
+    wantsCompletion: (x: number, y: number) => void;
     wantsEdit: () => void;
     wantsDelete: () => void;
     wantsFakeData: () => void;
@@ -70,7 +66,14 @@ export default function HabitItem({
             <View style={S.header}>
                 <GestureDetector gesture={tap}>{headerLeft}</GestureDetector>
 
-                <TouchableOpacity onPress={wantsCompletion}>
+                <TouchableOpacity
+                    onPress={evt =>
+                        wantsCompletion(
+                            evt.nativeEvent.pageX,
+                            evt.nativeEvent.pageY
+                        )
+                    }
+                >
                     <View style={S.completionCorner}>
                         <Text>
                             {countToday} / {habit.dailyGoal}

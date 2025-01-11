@@ -8,9 +8,14 @@ import JournalDayItem from './JournalDayItem';
 type JournalDayProps = {
     dateStr: string;
     entries: JournalEntry[];
+    onEntryPress: (entry: JournalEntry, x: number, y: number) => void;
 };
 
-export default function JournalDay({ dateStr, entries }: JournalDayProps) {
+export default function JournalDay({
+    dateStr,
+    entries,
+    onEntryPress,
+}: JournalDayProps) {
     const [year, month, day] = dateStr.split('-');
 
     dateStr = `${day}.${month}.${year}`;
@@ -41,6 +46,7 @@ export default function JournalDay({ dateStr, entries }: JournalDayProps) {
                     <JournalDayItem
                         key={`jdi${idx}`}
                         data={entry}
+                        onPress={(x, y) => onEntryPress(entry, x, y)}
                     />
                 ))}
             </View>

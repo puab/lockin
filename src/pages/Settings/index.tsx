@@ -5,11 +5,12 @@ import API from '../../API';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import AppTheme from '../../Theme';
 import AuthDialog from './components/AuthDialog';
-import { useAppStore } from '../../store';
+import { SyncData, useAppStore } from '../../store';
 import { useShallow } from 'zustand/react/shallow';
 
 import AES from 'crypto-js/aes';
 import UTF8 from 'crypto-js/enc-utf8';
+import Toast from 'react-native-toast-message';
 
 export default function SettingsScreen() {
     const state = useAppStore(
@@ -21,25 +22,12 @@ export default function SettingsScreen() {
         }))
     );
 
-    const [isServerOn, setIsServerOn] = useState<boolean>(false);
-    const [isConnecting, setIsConnecting] = useState<boolean>(true);
+    const importData = useAppStore(useShallow(s => s._importData));
+
     const [isSyncing, setIsSyncing] = useState<boolean>(false);
 
     const [isAuthDialogOpen, setIsAuthDialogOpen] = useState<boolean>(false);
     const [syncType, setSyncType] = useState<'export' | 'import' | undefined>();
-
-    async function attemptConnection() {
-        setIsConnecting(true);
-
-        const isGood = await API.ping();
-
-        setIsServerOn(isGood);
-        setIsConnecting(false);
-    }
-
-    useEffect(() => {
-        attemptConnection();
-    }, []);
 
     function wantsExport() {
         setSyncType('export');
@@ -63,74 +51,59 @@ export default function SettingsScreen() {
             ).toString();
 
             await API.exportData(payload);
+
+            Toast.show({
+                type: 'success',
+                text1: 'Export success',
+                text2: `Press "import" from any device to retreive your data`,
+            });
         } else if (syncType == 'import') {
             const payload = await API.importData();
 
-            const data = AES.decrypt(payload, encryptionKey).toString(UTF8);
+            const data: SyncData = JSON.parse(
+                AES.decrypt(payload, encryptionKey).toString(UTF8)
+            );
 
-            console.log(data);
+            importData(data);
+
+            Toast.show({
+                type: 'success',
+                text1: 'Import success',
+                text2: `Your exported data has been loaded on this device`,
+            });
         }
 
         setIsSyncing(false);
-
-        // if (
-        //     AES.decrypt(payload, encryptionKey).toString(UTF8) ===
-        //     JSON.stringify(state)
-        // ) {
-        //     console.log('Encryption test passed');
-        // }
     }
 
     return (
         <PageLayout style={S.page}>
-            <View style={S.serverStatusContainer}>
-                <View style={S.serverStatusContainerHeader}>
-                    <Text style={S.serverStatusText}>
-                        {isConnecting
-                            ? 'Connecting...'
-                            : isServerOn
-                            ? 'Connected!'
-                            : `Couldn't connect`}
-                    </Text>
+            <View style={S.serverStatusContent}>
+                <Button
+                    mode='contained'
+                    icon={'file-export-outline'}
+                    onPress={wantsExport}
+                    style={{
+                        flex: 1,
+                    }}
+                    disabled={isSyncing && syncType == 'import'}
+                    loading={isSyncing && syncType == 'export'}
+                >
+                    Export data
+                </Button>
 
-                    {!isConnecting && !isServerOn && (
-                        <TouchableOpacity onPress={attemptConnection}>
-                            <Icon
-                                size={20}
-                                color={AppTheme.colors.primary}
-                                source={'refresh-circle'}
-                            />
-                        </TouchableOpacity>
-                    )}
-                </View>
-
-                <View style={S.serverStatusContent}>
-                    <Button
-                        mode='contained'
-                        icon={'file-export-outline'}
-                        onPress={wantsExport}
-                        disabled={isConnecting || !isServerOn}
-                        style={{
-                            flex: 1,
-                        }}
-                        loading={isSyncing}
-                    >
-                        Export data
-                    </Button>
-
-                    <Button
-                        mode='contained'
-                        icon={'file-import-outline'}
-                        onPress={wantsImport}
-                        disabled={isConnecting || !isServerOn}
-                        style={{
-                            flex: 1,
-                        }}
-                        loading={isSyncing}
-                    >
-                        Import data
-                    </Button>
-                </View>
+                <Button
+                    mode='contained'
+                    icon={'file-import-outline'}
+                    onPress={wantsImport}
+                    style={{
+                        flex: 1,
+                    }}
+                    disabled={isSyncing && syncType == 'export'}
+                    loading={isSyncing && syncType == 'import'}
+                >
+                    Import data
+                </Button>
             </View>
 
             <AuthDialog
@@ -145,22 +118,9 @@ export default function SettingsScreen() {
 const S = StyleSheet.create({
     page: {
         gap: 5,
-        padding: 5,
+        padding: 10,
     },
 
-    serverStatusContainer: {
-        backgroundColor: AppTheme.colors.inverseOnSurface,
-        borderRadius: 10,
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        gap: 5,
-    },
-    serverStatusContainerHeader: {
-        flexDirection: 'row',
-        gap: 10,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
     serverStatusText: {
         fontWeight: 'bold',
         fontSize: 20,
@@ -169,6 +129,6 @@ const S = StyleSheet.create({
 
     serverStatusContent: {
         flexDirection: 'row',
-        gap: 5,
+        gap: 10,
     },
 });

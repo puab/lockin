@@ -1,4 +1,5 @@
-import { DateTime, Duration, DurationObjectUnits } from 'luxon';
+import { DateTime } from 'luxon';
+import * as Haptics from 'expo-haptics';
 
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
@@ -65,4 +66,8 @@ export function secondsToHuman(seconds: number) {
     }
 
     return timeString;
+}
+
+export function asyncVibrate() {
+    return Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
 }

@@ -9,6 +9,7 @@ export default function AddItemButton({ onPress }: AddItemButtonProps) {
             icon={'plus'}
             style={S.fab}
             onPress={onPress}
+            testID='add-item-button'
         />
     );
 }

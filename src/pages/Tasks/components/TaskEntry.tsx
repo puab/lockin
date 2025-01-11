@@ -4,31 +4,23 @@ import AppTheme, { COLORS } from '../../../Theme';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { StyleSheet, View } from 'react-native';
 import { Menu, RadioButton, Text } from 'react-native-paper';
-import { useAppStore } from '../../../store';
-import { useShallow } from 'zustand/react/shallow';
 
 type TaskEntryProps = {
     task: Task;
     wantsEdit: () => void;
     wantsDelete: () => void;
+    wantsComplete: (x: number, y: number) => void;
 };
 
 export default function TaskEntry({
     task,
     wantsEdit,
     wantsDelete,
+    wantsComplete,
 }: TaskEntryProps) {
-    const toggleTaskCompletion = useAppStore(
-        useShallow(s => s.toggleTaskCompletion)
-    );
-
     const taskHex = COLORS[task.color];
 
     const [menuOpen, setMenuOpen] = useState<boolean>(false);
-
-    function toggleTask() {
-        toggleTaskCompletion(task);
-    }
 
     const doubleTap = Gesture.Tap()
         .runOnJS(true)
@@ -42,7 +34,9 @@ export default function TaskEntry({
                     status={task.completed ? 'checked' : 'unchecked'}
                     color={taskHex}
                     uncheckedColor={taskHex}
-                    onPress={toggleTask}
+                    onPress={e =>
+                        wantsComplete(e.nativeEvent.pageX, e.nativeEvent.pageY)
+                    }
                 />
             </View>
 
@@ -100,7 +94,7 @@ const entry = StyleSheet.create({
     left: {},
     right: {
         justifyContent: 'center',
-        flexShrink: 1,
+        flex: 1,
     },
     description: {},
 });

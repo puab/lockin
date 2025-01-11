@@ -1,35 +1,21 @@
-import { useState } from 'react';
 import AppTheme, { COLORS } from '../../../Theme';
 import { Goal } from '../Types';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Icon, Menu, RadioButton, Text } from 'react-native-paper';
+import { StyleSheet, View } from 'react-native';
+import { Icon, RadioButton, Text } from 'react-native-paper';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { useShallow } from 'zustand/react/shallow';
-import { useAppStore } from '../../../store';
 
 type GoalItemProps = {
     goal: Goal;
-    wantsEdit: () => void;
-    wantsDelete: () => void;
+    wantsMenu: (x: number, y: number) => void;
+    wantsComplete: (x: number, y: number) => void;
 };
 
 export default function GoalItem({
     goal,
-    wantsEdit,
-    wantsDelete,
+    wantsMenu,
+    wantsComplete,
 }: GoalItemProps) {
-    const toggleGoalCompletion = useAppStore(
-        useShallow(s => s.toggleGoalCompletion)
-    );
-
     const goalHex = COLORS[goal.color];
-
-    const [menuOpen, setMenuOpen] = useState<boolean>(false);
-
-    function toggleCompletion() {
-        toggleGoalCompletion(goal);
-    }
-
     const headerLeft = (
         <View style={S.headerLeft}>
             <View style={S.iconContainer}>
@@ -56,9 +42,9 @@ export default function GoalItem({
 
     const tap = Gesture.Tap()
         .runOnJS(true)
-        .onStart(() => setMenuOpen(true));
+        .onStart(e => wantsMenu(e.absoluteX, e.absoluteY));
 
-    const el = (
+    return (
         <View style={[S.container, { borderColor: goalHex }]}>
             <View style={S.header}>
                 <GestureDetector gesture={tap}>{headerLeft}</GestureDetector>
@@ -68,40 +54,12 @@ export default function GoalItem({
                     status={goal.completed ? 'checked' : 'unchecked'}
                     color={goalHex}
                     uncheckedColor={goalHex}
-                    onPress={toggleCompletion}
+                    onPress={e =>
+                        wantsComplete(e.nativeEvent.pageX, e.nativeEvent.pageY)
+                    }
                 />
             </View>
         </View>
-    );
-
-    return (
-        <Menu
-            visible={menuOpen}
-            onDismiss={() => setMenuOpen(false)}
-            mode='elevated'
-            anchorPosition='bottom'
-            anchor={el}
-            style={{ marginLeft: 50 }}
-        >
-            <Menu.Item
-                onPress={() => {
-                    setMenuOpen(false);
-                    wantsEdit();
-                }}
-                title='Edit'
-                leadingIcon='pencil'
-            />
-            <Menu.Item
-                onPress={() => {
-                    setMenuOpen(false);
-                    wantsDelete();
-                }}
-                title='Delete'
-                leadingIcon='delete'
-                titleStyle={{ color: 'red' }}
-                theme={{ colors: { onSurfaceVariant: 'red' } }}
-            />
-        </Menu>
     );
 }
 
@@ -119,6 +77,7 @@ const S = StyleSheet.create({
         flexDirection: 'row',
         gap: 5,
         justifyContent: 'space-between',
+        alignItems: 'flex-start',
     },
     headerLeft: {
         flexDirection: 'row',

@@ -9,7 +9,10 @@ import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { useShallow } from 'zustand/react/shallow';
 import { Button } from 'react-native-paper';
 import NonIdealState from '../../../components/NonIdealState';
-import * as Haptics from 'expo-haptics';
+import LottieView from 'lottie-react-native';
+import { useRef, useState } from 'react';
+import { asyncVibrate, DateNowStr } from '../../../Util';
+import ConfettiBoom from '../../../components/ConfettiBoom';
 
 type HabitListProps = {
     habits: Habit[];
@@ -30,17 +33,34 @@ export default function HabitList({
 }: HabitListProps) {
     const overwriteHabits = useAppStore(useShallow(s => s.overwriteHabits));
 
+    const animationRef = useRef<LottieView>(null);
+    const [animationCoordinates, setAnimationCoordinates] = useState<
+        [number, number]
+    >([0, 0]);
+    function handleCompletion(item: Habit, x: number, y: number) {
+        const countToday = item.completionMatrix[DateNowStr] ?? 0;
+        if (countToday === item.dailyGoal) return;
+
+        if (countToday + 1 === item.dailyGoal) {
+            setAnimationCoordinates([x, y]);
+            animationRef.current?.play();
+            asyncVibrate();
+        }
+
+        wantsCompletion(item);
+    }
+
     const renderItem = ({ item, drag }) => (
         <ScaleDecorator>
             <TouchableWithoutFeedback
                 onLongPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+                    asyncVibrate();
                     drag();
                 }}
             >
                 <HabitItem
                     habit={item}
-                    wantsCompletion={() => wantsCompletion(item)}
+                    wantsCompletion={(x, y) => handleCompletion(item, x, y)}
                     wantsDelete={() => wantsDelete(item)}
                     wantsEdit={() => wantsEdit(item)}
                     wantsFakeData={() => wantsFakeData(item)}
@@ -50,30 +70,37 @@ export default function HabitList({
     );
 
     return (
-        <View style={{ marginTop: 5 }}>
-            {habits?.length === 0 ? (
-                <NonIdealState
-                    icon='beaker-question'
-                    title='No habits'
-                    message='Create a habit to get started'
-                >
-                    <Button
-                        style={{ marginRight: 15 }}
-                        mode='contained'
-                        icon={'plus'}
-                        onPress={() => wantsCreate()}
+        <>
+            <View style={{ marginTop: 5 }}>
+                {habits?.length === 0 ? (
+                    <NonIdealState
+                        icon='beaker-question'
+                        title='No habits'
+                        message='Create a habit to get started'
                     >
-                        Create
-                    </Button>
-                </NonIdealState>
-            ) : (
-                <DraggableFlatList
-                    data={habits}
-                    onDragEnd={({ data }) => overwriteHabits(data)}
-                    renderItem={renderItem}
-                    keyExtractor={item => `hi${item.id}`}
-                />
-            )}
-        </View>
+                        <Button
+                            style={{ marginRight: 15 }}
+                            mode='contained'
+                            icon={'plus'}
+                            onPress={() => wantsCreate()}
+                        >
+                            Create
+                        </Button>
+                    </NonIdealState>
+                ) : (
+                    <DraggableFlatList
+                        data={habits}
+                        onDragEnd={({ data }) => overwriteHabits(data)}
+                        renderItem={renderItem}
+                        keyExtractor={item => `hi${item.id}`}
+                    />
+                )}
+            </View>
+
+            <ConfettiBoom
+                animRef={animationRef}
+                coords={animationCoordinates}
+            />
+        </>
     );
 }

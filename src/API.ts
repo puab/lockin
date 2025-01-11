@@ -2,7 +2,8 @@ import axios, { AxiosError } from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
 const ax = axios.create({
-    baseURL: 'http://192.168.28.4:8090',
+    // baseURL: 'http://192.168.59.4:8090',
+    baseURL: 'https://lockin.bru.lv',
     headers: {
         Accept: 'application/json',
     },

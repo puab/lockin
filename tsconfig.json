@@ -3,6 +3,8 @@
     "compilerOptions": {
         "strict": true,
         "noImplicitAny": false,
-        "noUnusedLocals": true
+        "noUnusedLocals": true,
+        "moduleResolution": "Node",
+        "esModuleInterop": true
     }
 }

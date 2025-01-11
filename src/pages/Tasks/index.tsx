@@ -3,7 +3,7 @@ import PageLayout from '../../components/PageLayout';
 import { DateNow } from '../../Util';
 import DateRow from './components/DateRow';
 import { DateTime } from 'luxon';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Divider, Portal, Snackbar, Text } from 'react-native-paper';
 import TaskList from './components/TaskList';
 import { Task } from './Types';
@@ -12,8 +12,15 @@ import { useAppStore } from '../../store';
 import { useShallow } from 'zustand/react/shallow';
 import CreateOrUpdateTaskSheet from './components/CreateOrUpdateTaskSheet';
 import useSheetBack from '../../hooks/useSheetBack';
+import useHeaderRight from '../../hooks/useHeaderRight';
 
-export default function TasksScreen({ route, navigation }) {
+export default function TasksScreen({
+    route,
+    navigation,
+}: {
+    route?: any;
+    navigation?: any;
+}) {
     const [taskSheetOpen, setTaskSheetOpen] = useState<boolean>(false);
     useSheetBack(taskSheetOpen, setTaskSheetOpen);
 
@@ -28,15 +35,13 @@ export default function TasksScreen({ route, navigation }) {
     const [curDate, setCurDate] = useState<DateTime>(
         currentDateMs ? DateTime.fromMillis(currentDateMs) : DateNow
     );
-    useEffect(() => {
-        navigation?.setOptions({
-            headerRight: () => (
-                <Text style={{ color: 'black', marginRight: 15 }}>
-                    {curDate.toLocaleString(DateTime.DATE_FULL)}
-                </Text>
-            ),
-        });
-    }, [curDate]);
+    useHeaderRight(
+        <Text style={{ color: 'black', marginRight: 15 }}>
+            {curDate.toLocaleString(DateTime.DATE_FULL)}
+        </Text>,
+
+        [curDate]
+    );
 
     useMemo(() => {
         if (currentDateMs) setCurDate(DateTime.fromMillis(currentDateMs));

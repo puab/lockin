@@ -11,9 +11,12 @@ import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
 import NonIdealState from '../../../components/NonIdealState';
 import GoalStepTaskList from './GoalStepTaskList';
-import { useMemo } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { GoalStepTask } from '../../Goals/Types';
 import { Divider } from 'react-native-paper';
+import ConfettiBoom from '../../../components/ConfettiBoom';
+import LottieView from 'lottie-react-native';
+import { asyncVibrate } from '../../../Util';
 
 type TaskListProps = {
     tasks: Task[];
@@ -33,11 +36,28 @@ export default function TaskList({
     const activeDateStr = active.toFormat('yyyy-LL-dd');
 
     const overwriteTasks = useAppStore(useShallow(s => s.overwriteTasks));
+    const toggleTaskCompletion = useAppStore(
+        useShallow(s => s.toggleTaskCompletion)
+    );
+
+    const animationRef = useRef<LottieView>(null);
+    const [animationCoordinates, setAnimationCoordinates] = useState<
+        [number, number]
+    >([0, 0]);
+    function handleComplete(item: Task, x: number, y: number) {
+        if (!item.completed) {
+            setAnimationCoordinates([x, y]);
+            animationRef.current?.play();
+            asyncVibrate();
+        }
+        toggleTaskCompletion(item);
+    }
 
     const goals = useAppStore(s => s.goals);
     const goalStepsToday: GoalStepTask[] = useMemo(
         () =>
             goals
+                .filter(g => !g.completed)
                 .map(g =>
                     g.steps
                         .filter(s => {
@@ -76,6 +96,7 @@ export default function TaskList({
                         task={item}
                         wantsEdit={() => wantsEdit(item)}
                         wantsDelete={() => wantsDelete(item)}
+                        wantsComplete={(x, y) => handleComplete(item, x, y)}
                     />
                 </TouchableWithoutFeedback>
             </ScaleDecorator>
@@ -85,37 +106,46 @@ export default function TaskList({
     const displayTasks = tasks.filter(t => t.date === activeDateStr);
 
     return (
-        <View style={list.container}>
-            {displayTasks?.length === 0 && goalStepsToday.length === 0 ? (
-                <NonIdealState
-                    icon='calendar-question'
-                    title={`No tasks today`}
-                    message={
-                        !currentlyInPast
-                            ? `Add a new task by clicking the + button below or create a goal in the "Goals" section`
-                            : `You can't add tasks in the past`
-                    }
-                />
-            ) : (
-                <>
-                    <GoalStepTaskList
-                        activeDate={active}
-                        steps={goalStepsToday}
+        <>
+            <View style={list.container}>
+                {displayTasks?.length === 0 && goalStepsToday.length === 0 ? (
+                    <NonIdealState
+                        icon='calendar-question'
+                        title={`No tasks today`}
+                        message={
+                            !currentlyInPast
+                                ? `Add a new task by clicking the + button below or create a goal in the "Goals" section`
+                                : `You can't add tasks in the past`
+                        }
                     />
+                ) : (
+                    <>
+                        <GoalStepTaskList
+                            activeDate={active}
+                            steps={goalStepsToday}
+                        />
 
-                    {goalStepsToday.length > 0 && (
-                        <Divider style={{ marginBottom: 5, marginTop: -5 }} />
-                    )}
+                        {goalStepsToday.length > 0 && (
+                            <Divider
+                                style={{ marginBottom: 5, marginTop: -5 }}
+                            />
+                        )}
 
-                    <DraggableFlatList
-                        data={tasks}
-                        onDragEnd={({ data }) => overwriteTasks(data)}
-                        renderItem={props => renderItem(props)}
-                        keyExtractor={item => `te${item.id}`}
-                    />
-                </>
-            )}
-        </View>
+                        <DraggableFlatList
+                            data={tasks}
+                            onDragEnd={({ data }) => overwriteTasks(data)}
+                            renderItem={props => renderItem(props)}
+                            keyExtractor={item => `te${item.id}`}
+                        />
+                    </>
+                )}
+            </View>
+
+            <ConfettiBoom
+                animRef={animationRef}
+                coords={animationCoordinates}
+            />
+        </>
     );
 }
 

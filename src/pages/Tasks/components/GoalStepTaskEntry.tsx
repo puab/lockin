@@ -3,32 +3,24 @@ import AppTheme, { COLORS } from '../../../Theme';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { StyleSheet, View } from 'react-native';
 import { Menu, RadioButton, Text } from 'react-native-paper';
-import { useAppStore } from '../../../store';
-import { useShallow } from 'zustand/react/shallow';
 import { GoalStepTask } from '../../Goals/Types';
 
 type GoalStepTaskEntryProps = {
     step: GoalStepTask;
     activeDateStr: string;
     wantsSeeGoal: () => void;
+    wantsComplete: (x: number, y: number) => void;
 };
 
 export default function GoalStepTaskEntry({
     step,
     activeDateStr,
     wantsSeeGoal,
+    wantsComplete,
 }: GoalStepTaskEntryProps) {
-    const toggleGoalStepCompletion = useAppStore(
-        useShallow(s => s.toggleGoalStepCompletion)
-    );
-
     const goalHex = COLORS[step.goalColor];
 
     const [menuOpen, setMenuOpen] = useState<boolean>(false);
-
-    function toggleGoalStep() {
-        toggleGoalStepCompletion(step, activeDateStr);
-    }
 
     const doubleTap = Gesture.Tap()
         .runOnJS(true)
@@ -46,7 +38,12 @@ export default function GoalStepTaskEntry({
                     }
                     color={goalHex}
                     uncheckedColor={goalHex}
-                    onPress={toggleGoalStep}
+                    onPress={e =>
+                        wantsComplete(
+                            e.nativeEvent.pageX,
+                            e.nativeEvent.pageY - 50
+                        )
+                    }
                 />
             </View>
 
@@ -100,7 +97,7 @@ const entry = StyleSheet.create({
     left: {},
     right: {
         justifyContent: 'center',
-        flexShrink: 1,
+        flex: 1,
     },
     description: {},
 });

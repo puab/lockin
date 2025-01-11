@@ -1,6 +1,6 @@
 import { StyleSheet, useWindowDimensions } from 'react-native';
 import PageLayout from '../../components/PageLayout';
-import { Button } from 'react-native-paper';
+import { Button, Portal, Snackbar } from 'react-native-paper';
 import { useMemo, useRef, useState } from 'react';
 import useSheetBack from '../../hooks/useSheetBack';
 import CreateOrUpdateGoalSheet from './components/CreateOrUpdateGoalSheet';
@@ -17,6 +17,7 @@ export default function GoalsScreen() {
     const goals = useAppStore<Goal[]>(s => s.goals);
 
     const deleteGoal = useAppStore(useShallow(s => s.deleteGoal));
+    const createGoal = useAppStore(useShallow(s => s.createGoal));
 
     const [goalSheetOpen, setGoalSheetOpen] = useState<boolean>(false);
     useSheetBack(goalSheetOpen, setGoalSheetOpen);
@@ -81,48 +82,76 @@ export default function GoalsScreen() {
     );
 
     return (
-        <PageLayout style={S.page}>
-            <TabView
-                renderTabBar={props => (
-                    <TabBar
-                        {...props}
-                        style={{
-                            backgroundColor: AppTheme.colors.inverseOnSurface,
-                        }}
-                        indicatorStyle={{
-                            backgroundColor: AppTheme.colors.primary,
-                        }}
-                        labelStyle={{
-                            textTransform: 'none',
-                            fontWeight: 'bold',
-                        }}
-                    />
-                )}
-                navigationState={{
-                    index,
-                    routes: [
-                        { key: 'ongoing', title: 'Ongoing' },
-                        { key: 'completed', title: 'Completed' },
-                    ],
-                }}
-                renderScene={({ route }) => {
-                    switch (route.key) {
-                        case 'ongoing':
-                            return ongoingGoals;
-                        case 'completed':
-                            return completedGoals;
-                    }
-                }}
-                onIndexChange={setIndex}
-                initialLayout={{ width: layout.width }}
-            />
+        <>
+            <PageLayout style={S.page}>
+                <TabView
+                    renderTabBar={props => (
+                        <TabBar
+                            {...props}
+                            style={{
+                                backgroundColor:
+                                    AppTheme.colors.inverseOnSurface,
+                            }}
+                            indicatorStyle={{
+                                backgroundColor: AppTheme.colors.primary,
+                            }}
+                            labelStyle={{
+                                textTransform: 'none',
+                                fontWeight: 'bold',
+                            }}
+                        />
+                    )}
+                    navigationState={{
+                        index,
+                        routes: [
+                            { key: 'ongoing', title: 'Ongoing' },
+                            { key: 'completed', title: 'Completed' },
+                        ],
+                    }}
+                    renderScene={({ route }) => {
+                        switch (route.key) {
+                            case 'ongoing':
+                                return ongoingGoals;
+                            case 'completed':
+                                return completedGoals;
+                        }
+                    }}
+                    onIndexChange={setIndex}
+                    initialLayout={{ width: layout.width }}
+                />
 
-            <CreateOrUpdateGoalSheet
-                open={goalSheetOpen}
-                setOpen={setGoalSheetOpen}
-                editTarget={editTargetRef.current}
-            />
-        </PageLayout>
+                <CreateOrUpdateGoalSheet
+                    open={goalSheetOpen}
+                    setOpen={setGoalSheetOpen}
+                    editTarget={editTargetRef.current}
+                />
+            </PageLayout>
+
+            {useMemo(
+                () => (
+                    <Portal>
+                        <Snackbar
+                            visible={justDeleted}
+                            onDismiss={() => {
+                                deleteTargetRef.current = null;
+                                setJustDeleted(false);
+                            }}
+                            action={{
+                                label: 'Undo',
+                                onPress: () => {
+                                    if (deleteTargetRef.current) {
+                                        createGoal(deleteTargetRef.current);
+                                    }
+                                },
+                            }}
+                        >
+                            Deleted goal
+                        </Snackbar>
+                    </Portal>
+                ),
+                [justDeleted]
+            )}
+        </>
     );
 }
 

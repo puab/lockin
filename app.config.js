@@ -1,6 +1,7 @@
-module.export = {
+module.exports = {
     name: 'organizo',
     slug: 'organizo',
+
     version: '1.0.0',
     orientation: 'portrait',
     icon: './assets/lockin.png',
@@ -19,13 +20,14 @@ module.export = {
         supportsTablet: true,
     },
     android: {
+        package: 'com.puab.organizo',
         adaptiveIcon: {
-            foregroundImage: './assets/adaptive-icon.png',
+            foregroundImage: './assets/lockin.png',
             backgroundColor: '#ffffff',
         },
     },
     web: {
-        favicon: './assets/favicon.png',
+        favicon: './assets/lockin.png',
     },
     plugins: [
         [
@@ -36,4 +38,9 @@ module.export = {
             },
         ],
     ],
+    extra: {
+        eas: {
+            projectId: 'aa14deef-8611-4fea-91d9-f20dd6589aa0',
+        },
+    },
 };
