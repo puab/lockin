@@ -1,20 +1,19 @@
 module.exports = {
-    name: 'organizo',
+    name: 'Organizo',
     slug: 'organizo',
 
     version: '1.0.0',
     orientation: 'portrait',
-    icon: './assets/lockin.png',
+    icon: './assets/organizo.png',
     userInterfaceStyle: 'dark',
-    entryPoint: './src/App.tsx',
+    entryPoint: './App.tsx',
     notification: {
-        icon: './assets/lockin.png',
-        color: '#ff0000',
+        icon: './assets/organizo.png',
     },
     splash: {
-        image: './assets/lockin.png',
+        image: './assets/organizo.png',
         resizeMode: 'contain',
-        backgroundColor: '#ffffff',
+        backgroundColor: '#000000',
     },
     ios: {
         supportsTablet: true,
@@ -22,19 +21,17 @@ module.exports = {
     android: {
         package: 'com.puab.organizo',
         adaptiveIcon: {
-            foregroundImage: './assets/lockin.png',
-            backgroundColor: '#ffffff',
+            foregroundImage: './assets/organizo.png',
         },
     },
     web: {
-        favicon: './assets/lockin.png',
+        favicon: './assets/organizo.png',
     },
     plugins: [
         [
             'expo-notifications',
             {
-                icon: './assets/lockin.png',
-                color: '#ff0000',
+                icon: './assets/organizo.png',
             },
         ],
     ],
