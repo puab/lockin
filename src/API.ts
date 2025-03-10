@@ -3,7 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 
 const ax = axios.create({
     // baseURL: 'http://192.168.59.4:8090',
-    baseURL: 'https://organizo.bru.lv',
+    baseURL: 'https://organizo-api.bru.lv',
     headers: {
         Accept: 'application/json',
     },

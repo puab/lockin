@@ -65,17 +65,13 @@ export const createGoalSlice: StateCreator<GoalSlice, [], [], GoalSlice> = (
                     ...g,
                     steps: g.steps.map(s => {
                         if (s.id === goalStep.id) {
-                            s.completedDates = s.completedDates ?? [];
+                            const completedDates = s.completedDates ?? [];
 
                             return {
                                 ...s,
-                                completedDates: s.completedDates.includes(
-                                    dateStr
-                                )
-                                    ? s.completedDates.filter(
-                                          d => d !== dateStr
-                                      )
-                                    : [...s.completedDates, dateStr],
+                                completedDates: completedDates.includes(dateStr)
+                                    ? completedDates.filter(d => d !== dateStr)
+                                    : [...completedDates, dateStr],
                             };
                         }
 
