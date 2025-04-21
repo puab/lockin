@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import PageLayout from '../../components/PageLayout';
-import { Button, Icon, Text } from 'react-native-paper';
+import { Button } from 'react-native-paper';
 import API from '../../API';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import AppTheme from '../../Theme';
+import { StyleSheet, View } from 'react-native';
 import AuthDialog from './components/AuthDialog';
 import { SyncData, useAppStore } from '../../store';
 import { useShallow } from 'zustand/react/shallow';
