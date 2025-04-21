@@ -2,8 +2,8 @@ import axios, { AxiosError } from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
 const ax = axios.create({
-    // baseURL: 'http://192.168.59.4:8090',
-    baseURL: 'https://organizo-api.bru.lv',
+    baseURL: 'http://192.168.136.4:8090',
+    // baseURL: 'https://organizo-api.bru.lv',
     headers: {
         Accept: 'application/json',
     },
@@ -15,7 +15,6 @@ function handleFetchError(e: any) {
         const err = e as AxiosError;
         return err.response?.data as { [key: string]: any } | undefined;
     } else {
-        console.error(e);
         return e;
     }
 }
@@ -37,12 +36,31 @@ class _API {
         await new Promise(res => setTimeout(res, 1000));
 
         try {
-            const { data } = await ax.post('/check-credentials', {
+            const res = await ax.post('/check-credentials', {
                 username,
                 password,
             });
 
-            return data;
+            console.log(res);
+
+            return res.data;
+        } catch (e) {
+            return handleFetchError(e);
+        }
+    }
+
+    async register(username: string, password: string) {
+        await new Promise(res => setTimeout(res, 1000));
+
+        try {
+            const res = await ax.post('/register', {
+                username,
+                password,
+            });
+
+            console.log(res);
+
+            return res.data;
         } catch (e) {
             return handleFetchError(e);
         }

@@ -5,6 +5,7 @@ import API from '../../../API';
 import AppTheme from '../../../Theme';
 
 import * as SecureStore from 'expo-secure-store';
+import Toast from 'react-native-toast-message';
 
 type AuthDialogProps = {
     open: boolean;
@@ -17,10 +18,12 @@ export default function AuthDialog({
     setOpen,
     onAuthSuccess,
 }: AuthDialogProps) {
+    const [isRegisterMode, setIsRegisterMode] = useState<boolean>(false);
+
     const [busy, setBusy] = useState<boolean>(false);
     const [username, setUsername] = useState<string>('');
     const [password, setPassword] = useState<string>('');
-
+    const [confirmPassword, setConfirmPassword] = useState<string>('');
     const [errorMessage, setErrorMessage] = useState<string>('');
 
     useEffect(() => {
@@ -34,6 +37,13 @@ export default function AuthDialog({
         })();
     }, []);
 
+    function clearInputs() {
+        setUsername('');
+        setPassword('');
+        setConfirmPassword('');
+        setErrorMessage('');
+    }
+
     async function wantsLogin() {
         setBusy(true);
 
@@ -45,6 +55,34 @@ export default function AuthDialog({
             setErrorMessage('');
             onAuthSuccess(res.encryptionKey);
             await SecureStore.setItemAsync('savedUsername', username);
+        }
+
+        setBusy(false);
+    }
+
+    async function wantsRegister() {
+        setBusy(true);
+
+        if (password != confirmPassword) {
+            setErrorMessage('Passwords do not match');
+            setBusy(false);
+            return;
+        }
+
+        const res = await API.register(username, password);
+
+        if (res?.message != 'success') {
+            setErrorMessage(res?.message ?? 'Unknown error');
+        } else {
+            setErrorMessage('');
+
+            Toast.show({
+                type: 'success',
+                text1: 'Registration success',
+                text2: `Press login to continue`,
+            });
+            setIsRegisterMode(false);
+            clearInputs();
         }
 
         setBusy(false);
@@ -87,14 +125,35 @@ export default function AuthDialog({
                         onChange={setPassword}
                     />
 
+                    {isRegisterMode && (
+                        <FormTextField
+                            label='Confirm password'
+                            password={true}
+                            value={confirmPassword}
+                            onChange={setConfirmPassword}
+                        />
+                    )}
+
                     <Button
                         mode='elevated'
                         icon={'lock'}
-                        onPress={wantsLogin}
+                        onPress={isRegisterMode ? wantsRegister : wantsLogin}
                         loading={busy}
                     >
-                        Login
+                        {isRegisterMode ? 'Sign up' : 'Login'}
                     </Button>
+
+                    <Text style={{ textAlign: 'center' }}>
+                        {isRegisterMode
+                            ? 'Already have an account? '
+                            : "Don't have an account? "}
+                        <Text
+                            style={{ textDecorationLine: 'underline' }}
+                            onPress={() => setIsRegisterMode(!isRegisterMode)}
+                        >
+                            {isRegisterMode ? 'Login' : 'Sign up'}
+                        </Text>
+                    </Text>
                 </Dialog.Content>
             </Dialog>
         </Portal>
