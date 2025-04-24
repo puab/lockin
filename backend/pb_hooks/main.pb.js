@@ -3,11 +3,14 @@ routerAdd('GET', '/ping', c => {
 });
 
 routerAdd('POST', '/check-credentials', c => {
+    // paņem datus no request body
     const data = $apis.requestInfo(c).data;
     const { username, password } = data;
 
+    // šifrē paroli ar sha256
     const passwordHash = $security.hs256(password);
 
+    // meklē lietotāju ar šo username un passwordHash
     try {
         const record = $app
             .dao()
@@ -17,6 +20,8 @@ routerAdd('POST', '/check-credentials', c => {
                 { username, passwordHash: passwordHash.toString() }
             );
 
+        // ja lietotājs ir atrasts, atgriež 200 statusu un atslēgu ar kuru šifrēt eksporta datus
+        // vai atšifrēt importa datus
         if (record) {
             return c.json(200, {
                 message: 'success',
@@ -24,9 +29,11 @@ routerAdd('POST', '/check-credentials', c => {
             });
         }
     } catch (e) {
+        // ja lietotājs nav atrasts, atgriež 401 statusu
         return c.json(401, { message: 'Invalid credentials' });
     }
 
+    // ja lietotājs nav atrasts, atgriež 401 statusu
     return c.json(401, { message: 'Invalid credentials' });
 });
 

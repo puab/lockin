@@ -12,23 +12,32 @@ type HabitCalendarProps = {
 };
 
 export default function HabitCalendar({ habit }: HabitCalendarProps) {
+    // iegūst ieraduma izpildes matricu un celiņa krāsu
     const matrix = habit.completionMatrix;
     const hexCol = COLORS[habit.color];
 
+    // ietveram visu useMemo, lai komponente pārzīmētos tikai tad, ja mainās "matrix" vai "hexCol"
     return useMemo(
         () => (
+            // noliekam ScrollView, lai komponentē varētu tīt
+            // pasakam "horizontal", lai tīšana notiktu pa labi un pa kreisi
             <ScrollView horizontal>
+                {/* izveidojam galveno satura skatu, kur būs visi celiņi */}
                 <View style={S.container}>
+                    {/* par katru dienu, kas ir pēdējās 52 * 7 dienas (gads), izveidojam jaunu kvadrātu konteinerī */}
                     {habitDays.map((dateStr, idx) => {
+                        // aprēķinām, cik procentu no dienas mērķa ir sasniegts
                         const percent =
                             (matrix[dateStr] ?? 0) / habit.dailyGoal;
 
+                        // izveidojam celiņa krāsu, pamatojoties uz procentuālo daudzumu
                         const col =
                             percent == 0
                                 ? baseCol
                                 : hexCol +
                                   Math.floor(255 * percent).toString(16);
 
+                        // izveidojam jaunu kvadrātu konteineri, kurā būs celiņa krāsa
                         return (
                             <View
                                 key={`hci${idx}`}
@@ -38,9 +47,7 @@ export default function HabitCalendar({ habit }: HabitCalendarProps) {
                                         backgroundColor: col,
                                     },
                                 ]}
-                            >
-                                {/* <Text>{col}</Text> */}
-                            </View>
+                            ></View>
                         );
                     })}
                 </View>
@@ -50,9 +57,11 @@ export default function HabitCalendar({ habit }: HabitCalendarProps) {
     );
 }
 
+// statiskas konstantes kas nosaka celiņu izmēru un atstatumu starp tiem
 const gap = 3;
 const cellSize = 15;
 
+// statisks stilu objekts, kas definē celiņu konteineri un to stilu
 const S = StyleSheet.create({
     container: {
         height: cellSize * 7 + gap * 6,

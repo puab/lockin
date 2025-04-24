@@ -41,8 +41,6 @@ class _API {
                 password,
             });
 
-            console.log(res);
-
             return res.data;
         } catch (e) {
             return handleFetchError(e);
@@ -57,8 +55,6 @@ class _API {
                 username,
                 password,
             });
-
-            console.log(res);
 
             return res.data;
         } catch (e) {

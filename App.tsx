@@ -63,7 +63,8 @@ export function AppProviders({ children }: { children: any }) {
                                                 color: 'white',
                                                 fontSize: 14,
                                             }}
-                                            text2NumberOfLines={2}
+                                            text1NumberOfLines={2}
+                                            text2NumberOfLines={5}
                                         />
                                     ),
                                 }}
