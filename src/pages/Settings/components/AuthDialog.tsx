@@ -63,6 +63,12 @@ export default function AuthDialog({
     async function wantsRegister() {
         setBusy(true);
 
+        if (!username) {
+            setErrorMessage('Username is required');
+            setBusy(false);
+            return;
+        }
+
         if (password != confirmPassword) {
             setErrorMessage('Passwords do not match');
             setBusy(false);

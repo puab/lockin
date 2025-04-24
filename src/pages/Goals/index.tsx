@@ -1,7 +1,7 @@
 import { StyleSheet, useWindowDimensions } from 'react-native';
 import PageLayout from '../../components/PageLayout';
 import { Button, Portal, Snackbar } from 'react-native-paper';
-import { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import useSheetBack from '../../hooks/useSheetBack';
 import CreateOrUpdateGoalSheet from './components/CreateOrUpdateGoalSheet';
 import useHeaderRight from '../../hooks/useHeaderRight';
@@ -43,16 +43,14 @@ export default function GoalsScreen() {
     }
 
     useHeaderRight(
-        goals.length !== 0 ? (
-            <Button
-                style={{ marginRight: 15 }}
-                mode='elevated'
-                icon={'plus'}
-                onPress={wantsCreate}
-            >
-                Create
-            </Button>
-        ) : null,
+        <Button
+            style={{ marginRight: 15 }}
+            mode='elevated'
+            icon={'plus'}
+            onPress={wantsCreate}
+        >
+            Create
+        </Button>,
         [goals]
     );
 
@@ -82,7 +80,7 @@ export default function GoalsScreen() {
     );
 
     return (
-        <>
+        <React.Fragment>
             <PageLayout style={S.page}>
                 <TabView
                     renderTabBar={props => (
@@ -151,7 +149,7 @@ export default function GoalsScreen() {
                 ),
                 [justDeleted]
             )}
-        </>
+        </React.Fragment>
     );
 }
 

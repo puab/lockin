@@ -10,7 +10,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { Button } from 'react-native-paper';
 import NonIdealState from '../../../components/NonIdealState';
 import LottieView from 'lottie-react-native';
-import { useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { asyncVibrate, DateNowStr } from '../../../Util';
 import ConfettiBoom from '../../../components/ConfettiBoom';
 
@@ -70,23 +70,14 @@ export default function HabitList({
     );
 
     return (
-        <>
+        <React.Fragment>
             <View style={{ marginTop: 5 }}>
                 {habits?.length === 0 ? (
                     <NonIdealState
                         icon='beaker-question'
                         title='No habits'
                         message='Create a habit to get started'
-                    >
-                        <Button
-                            style={{ marginRight: 15 }}
-                            mode='contained'
-                            icon={'plus'}
-                            onPress={() => wantsCreate()}
-                        >
-                            Create
-                        </Button>
-                    </NonIdealState>
+                    ></NonIdealState>
                 ) : (
                     <DraggableFlatList
                         data={habits}
@@ -101,6 +92,6 @@ export default function HabitList({
                 animRef={animationRef}
                 coords={animationCoordinates}
             />
-        </>
+        </React.Fragment>
     );
 }

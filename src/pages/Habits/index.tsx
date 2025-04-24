@@ -54,16 +54,14 @@ export default function HabitScreen({ navigation }) {
     }
 
     useHeaderRight(
-        habits.length !== 0 ? (
-            <Button
-                style={{ marginRight: 15 }}
-                mode='elevated'
-                icon={'plus'}
-                onPress={wantsCreate}
-            >
-                Create
-            </Button>
-        ) : null,
+        <Button
+            style={{ marginRight: 15 }}
+            mode='elevated'
+            icon={'plus'}
+            onPress={wantsCreate}
+        >
+            Create
+        </Button>,
         [habits]
     );
 

@@ -10,7 +10,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 
 import GoalItem from './GoalItem';
-import { useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import LottieView from 'lottie-react-native';
 import ConfettiBoom from '../../../components/ConfettiBoom';
 import { asyncVibrate } from '../../../Util';
@@ -78,23 +78,14 @@ export default function GoalList({
     );
 
     return (
-        <>
+        <React.Fragment>
             <View style={{ marginTop: 10 }}>
                 {goals?.length === 0 ? (
                     <NonIdealState
                         icon='crosshairs-question'
                         title={nonIdealTitle}
                         message={nonIdealMessage}
-                    >
-                        <Button
-                            style={{ marginRight: 15 }}
-                            mode='contained'
-                            icon={'plus'}
-                            onPress={() => wantsCreate()}
-                        >
-                            Create
-                        </Button>
-                    </NonIdealState>
+                    ></NonIdealState>
                 ) : (
                     <DraggableFlatList
                         data={goals}
@@ -136,6 +127,6 @@ export default function GoalList({
                     theme={{ colors: { onSurfaceVariant: 'red' } }}
                 />
             </Menu>
-        </>
+        </React.Fragment>
     );
 }
